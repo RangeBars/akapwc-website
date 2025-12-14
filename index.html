@@ -593,6 +593,28 @@
     .hero-subtitle::after{content:'|';color:var(--green);animation:cursorBlink 1s step-end infinite;margin-left:2px}
     @keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
     
+    /* Hero Video */
+    .hero-video-wrapper{margin:40px auto;max-width:600px}
+    .hero-video{
+      position:relative;aspect-ratio:16/9;border-radius:16px;overflow:hidden;
+      cursor:pointer;background:#111;
+      border:2px solid rgba(0,255,136,0.3);
+      box-shadow:0 20px 60px rgba(0,255,136,0.2);
+      transition:all 0.4s;
+    }
+    .hero-video:hover{border-color:var(--green);box-shadow:0 25px 70px rgba(0,255,136,0.3);transform:translateY(-5px)}
+    .hero-video img{width:100%;height:100%;object-fit:cover;filter:brightness(0.8);transition:all 0.4s}
+    .hero-video:hover img{filter:brightness(1)}
+    .hero-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+    .hero-video-play{
+      position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      width:80px;height:80px;background:rgba(0,255,136,0.95);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 10px 40px rgba(0,255,136,0.5);transition:all 0.3s;
+    }
+    .hero-video-play svg{width:32px;height:32px;fill:#000;margin-left:4px}
+    .hero-video:hover .hero-video-play{transform:translate(-50%,-50%) scale(1.1);box-shadow:0 15px 50px rgba(0,255,136,0.6)}
+    
     .hero-cta{display:inline-flex;align-items:center;gap:12px;padding:20px 48px;background:linear-gradient(135deg,var(--green),#00cc6a);color:#000;font-size:18px;font-weight:700;border-radius:12px;text-decoration:none;box-shadow:0 10px 40px var(--green-glow);transition:all 0.3s;animation:fadeInUp 0.8s ease-out 0.6s both,ctaPulse 2s ease-in-out infinite 1.5s;position:relative;overflow:hidden}
     .hero-cta::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);animation:ctaShimmer 2s ease-in-out infinite}
     @keyframes ctaShimmer{0%{left:-100%}50%,100%{left:100%}}
@@ -723,61 +745,130 @@
     /* STEPS - AKAPWC STYLE */
     .steps-container{max-width:900px;margin:0 auto}
     
-    /* MAIN STEP 1 BUTTON */
+    /* MAIN STEP 1 BUTTON - PREMIUM GOLD DESIGN */
     .step-main{
       position:relative;
       display:block;
-      padding:28px 40px;
-      background:linear-gradient(135deg,#00ff88 0%,#00cc6a 50%,#00aa55 100%);
-      border-radius:16px;
+      padding:36px 80px 36px 50px;
+      background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f0f23 100%);
+      border-radius:20px;
       text-decoration:none;
       text-align:center;
       cursor:pointer;
-      transition:all 0.4s ease;
+      transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       overflow:hidden;
-      box-shadow:0 8px 32px rgba(0,255,136,0.3),0 0 0 1px rgba(255,255,255,0.1) inset;
       margin-bottom:24px;
-      animation:pulseGlow 2s ease-in-out infinite;
+      border:2px solid transparent;
+      background-clip:padding-box;
     }
-    @keyframes pulseGlow{
-      0%,100%{box-shadow:0 8px 32px rgba(0,255,136,0.3),0 0 0 1px rgba(255,255,255,0.1) inset}
-      50%{box-shadow:0 8px 48px rgba(0,255,136,0.5),0 0 80px rgba(0,255,136,0.2),0 0 0 1px rgba(255,255,255,0.1) inset}
-    }
+    /* Animated gradient border */
     .step-main::before{
+      content:'';position:absolute;inset:-3px;z-index:-1;
+      background:linear-gradient(90deg,#ffd700,#ff8c00,#ff6347,#ff8c00,#ffd700);
+      background-size:300% 100%;
+      border-radius:22px;
+      animation:borderFlow 3s linear infinite;
+    }
+    @keyframes borderFlow{
+      0%{background-position:0% 50%}
+      100%{background-position:300% 50%}
+    }
+    /* Inner glow effect */
+    .step-main::after{
       content:'';position:absolute;inset:0;
-      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);
+      background:radial-gradient(ellipse at 50% 0%,rgba(255,215,0,0.15) 0%,transparent 60%);
+      pointer-events:none;
+    }
+    /* Floating particles */
+    .step-main .particle{
+      position:absolute;width:4px;height:4px;
+      background:var(--gold);border-radius:50%;
+      pointer-events:none;opacity:0;
+      animation:floatParticle 3s ease-in-out infinite;
+    }
+    .step-main .particle:nth-child(1){left:10%;top:20%;animation-delay:0s}
+    .step-main .particle:nth-child(2){left:20%;top:70%;animation-delay:0.5s}
+    .step-main .particle:nth-child(3){left:80%;top:30%;animation-delay:1s}
+    .step-main .particle:nth-child(4){left:90%;top:60%;animation-delay:1.5s}
+    .step-main .particle:nth-child(5){left:50%;top:10%;animation-delay:2s}
+    .step-main .particle:nth-child(6){left:30%;top:80%;animation-delay:2.5s}
+    @keyframes floatParticle{
+      0%,100%{opacity:0;transform:translateY(0) scale(0)}
+      50%{opacity:1;transform:translateY(-20px) scale(1)}
+    }
+    /* Shimmer sweep */
+    .step-main .shimmer{
+      position:absolute;inset:0;
+      background:linear-gradient(90deg,transparent,rgba(255,215,0,0.2),transparent);
       transform:translateX(-100%);
-      animation:shimmer 3s ease-in-out infinite;
+      animation:goldShimmer 4s ease-in-out infinite;
     }
-    @keyframes shimmer{0%,100%{transform:translateX(-100%)}50%{transform:translateX(100%)}}
+    @keyframes goldShimmer{0%,100%{transform:translateX(-100%)}50%{transform:translateX(100%)}}
+    
     .step-main:hover{
-      transform:translateY(-4px) scale(1.02);
-      box-shadow:0 16px 48px rgba(0,255,136,0.5),0 0 80px rgba(0,255,136,0.3),0 0 0 1px rgba(255,255,255,0.2) inset;
-      animation:none;
+      transform:translateY(-6px) scale(1.03);
+      box-shadow:
+        0 20px 60px rgba(255,215,0,0.4),
+        0 0 100px rgba(255,140,0,0.2),
+        inset 0 1px 0 rgba(255,255,255,0.1);
     }
+    .step-main:hover::before{animation-duration:1s}
+    
     .step-main-label{
       display:block;
-      font-size:13px;font-weight:800;color:rgba(0,0,0,0.6);
-      text-transform:uppercase;letter-spacing:2px;
-      margin-bottom:8px;
+      font-size:12px;font-weight:800;
+      color:var(--gold);
+      text-transform:uppercase;letter-spacing:3px;
+      margin-bottom:12px;
+      text-shadow:0 0 20px rgba(255,215,0,0.5);
     }
     .step-main-title{
-      font-size:clamp(20px,3vw,28px);font-weight:800;color:#000;
-      text-transform:uppercase;letter-spacing:1px;
-      margin-bottom:8px;
+      display:block;
+      font-size:clamp(20px,3vw,28px);font-weight:800;
+      background:linear-gradient(135deg,#ffd700 0%,#fff 25%,#ffd700 50%,#ff8c00 75%,#ffd700 100%);
+      background-size:200% auto;
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+      animation:goldText 3s linear infinite;
+      text-transform:uppercase;letter-spacing:2px;
+      margin-bottom:10px;
+      white-space:nowrap;
     }
+    @keyframes goldText{0%{background-position:0% center}100%{background-position:200% center}}
     .step-main-desc{
-      font-size:14px;color:rgba(0,0,0,0.7);font-weight:500;
-      text-transform:uppercase;letter-spacing:0.5px;
+      display:block;
+      font-size:13px;color:rgba(255,255,255,0.7);font-weight:500;
+      letter-spacing:0.5px;
+      max-width:500px;margin:0 auto;
     }
     .step-main-arrow{
       position:absolute;right:30px;top:50%;transform:translateY(-50%);
-      width:50px;height:50px;background:rgba(0,0,0,0.15);border-radius:50%;
+      width:56px;height:56px;
+      background:linear-gradient(135deg,#ffd700,#ff8c00);
+      border-radius:50%;
       display:flex;align-items:center;justify-content:center;
-      transition:all 0.3s;
+      transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow:0 4px 20px rgba(255,215,0,0.4);
     }
-    .step-main-arrow svg{width:24px;height:24px;fill:#000}
-    .step-main:hover .step-main-arrow{background:rgba(0,0,0,0.25);transform:translateY(-50%) scale(1.1)}
+    .step-main-arrow svg{width:26px;height:26px;fill:#000;transition:transform 0.3s}
+    .step-main:hover .step-main-arrow{
+      transform:translateY(-50%) scale(1.15) rotate(360deg);
+      box-shadow:0 8px 30px rgba(255,215,0,0.6);
+    }
+    .step-main:hover .step-main-arrow svg{transform:translateX(3px)}
+    
+    /* Pulsing ring effect */
+    .step-main .pulse-ring{
+      position:absolute;inset:-10px;
+      border:2px solid rgba(255,215,0,0.3);
+      border-radius:26px;
+      animation:pulseRing 2s ease-out infinite;
+    }
+    @keyframes pulseRing{
+      0%{transform:scale(1);opacity:0.5}
+      100%{transform:scale(1.05);opacity:0}
+    }
     
     /* LOCKED STEPS CONTAINER */
     .steps-locked-wrapper{position:relative;margin-top:16px}
@@ -810,11 +901,20 @@
       filter:blur(1px);
     }
     .step-locked-card{
+      display:block;
       padding:24px 20px;
       background:var(--bg-card);
       border:1px solid var(--border);
       border-radius:14px;
       text-align:center;
+      text-decoration:none;
+      transition:all 0.3s;
+      cursor:pointer;
+    }
+    .steps-locked-wrapper.unlocked .step-locked-card:hover{
+      transform:translateY(-5px);
+      box-shadow:0 10px 30px rgba(0,255,136,0.2);
+      border-color:var(--green);
     }
     .step-locked-num{
       width:48px;height:48px;
@@ -834,9 +934,40 @@
       line-height:1.4;
     }
     
+    /* UNLOCKED STATE */
+    .steps-locked-wrapper.unlocked .steps-locked-overlay{
+      opacity:0;
+      pointer-events:none;
+      transform:scale(0.9);
+    }
+    .steps-locked-wrapper.unlocked .steps-locked-grid{
+      opacity:1;
+      filter:none;
+    }
+    .steps-locked-wrapper.unlocked .step-locked-card{
+      border-color:var(--border-green);
+      animation:stepUnlock 0.5s ease-out forwards;
+    }
+    .steps-locked-wrapper.unlocked .step-locked-card:nth-child(1){animation-delay:0.1s}
+    .steps-locked-wrapper.unlocked .step-locked-card:nth-child(2){animation-delay:0.2s}
+    .steps-locked-wrapper.unlocked .step-locked-card:nth-child(3){animation-delay:0.3s}
+    .steps-locked-wrapper.unlocked .step-locked-num{
+      background:var(--green-dim);
+      border-color:var(--green);
+      color:var(--green);
+    }
+    .steps-locked-wrapper.unlocked .step-locked-title{color:var(--text)}
+    @keyframes stepUnlock{
+      0%{transform:translateY(10px);opacity:0}
+      100%{transform:translateY(0);opacity:1}
+    }
+
     @media(max-width:768px){
       .steps-locked-grid{grid-template-columns:1fr}
       .step-main-arrow{display:none}
+      .step-main{padding:28px 24px}
+      .step-main-title{font-size:18px;letter-spacing:1px;white-space:normal}
+      .step-main .particle{display:none}
     }
     
     /* ACTION ACCORDION BARS - AKAPWC STYLE */
@@ -880,11 +1011,12 @@
       transition:max-height 0.5s cubic-bezier(0.4,0,0.2,1),padding 0.4s ease;
     }
     .action-bar-content.open{
-      max-height:300px;
+      max-height:2000px;
       padding:24px;
       border:1px solid var(--border);
       border-top:none;
       animation:contentFadeIn 0.4s ease-out;
+      overflow-y:auto;
     }
     @keyframes contentFadeIn{from{opacity:0}to{opacity:1}}
     .action-bar-content p{
@@ -893,6 +1025,211 @@
     .action-bar-content p:last-child{margin-bottom:0}
     .action-bar-content strong{color:var(--text)}
     
+    /* ACCORDION CONTENT SECTIONS */
+    .accordion-heading{font-size:24px;font-weight:800;color:#fff;margin:0 0 8px;text-align:center}
+    .accordion-subheading{font-size:14px;color:var(--text-dim);margin:0 0 20px;text-align:center}
+    .accordion-highlight{color:var(--green);text-shadow:0 0 20px rgba(0,255,136,0.4)}
+    
+    /* Social Buttons */
+    .social-buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:16px 0}
+    .social-btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:12px 24px;border-radius:12px;
+      font-weight:700;text-transform:uppercase;letter-spacing:0.5px;
+      color:#fff;text-decoration:none;font-size:13px;
+      transition:all 0.3s;box-shadow:0 4px 15px rgba(0,0,0,0.3);
+    }
+    .social-btn:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(0,0,0,0.4)}
+    .social-btn.tiktok{background:linear-gradient(135deg,#00f2ea,#ff0050)}
+    .social-btn.youtube{background:linear-gradient(135deg,#ff6b6b,#e31b23)}
+    .social-btn.twitch{background:linear-gradient(135deg,#b879ff,#9146ff)}
+    .social-btn.discord{background:linear-gradient(135deg,#7289da,#5865f2)}
+    .social-btn.skool{background:linear-gradient(135deg,#3fa76e,#217c4d)}
+    .social-btn.abbado{background:linear-gradient(135deg,#9d6fdc,#d14fd1)}
+    
+    /* Video Frame */
+    .video-frame{
+      position:relative;width:100%;max-width:700px;margin:16px auto;
+      background:#000;border:2px solid rgba(255,255,255,0.1);border-radius:16px;
+      overflow:hidden;aspect-ratio:16/9;
+    }
+    .video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+    
+    /* Video Review Grid */
+    .reviews-video-grid{
+      display:grid;gap:12px;
+      grid-template-columns:repeat(2,1fr);
+      margin:16px 0;
+    }
+    @media(min-width:768px){.reviews-video-grid{grid-template-columns:repeat(4,1fr)}}
+    .review-thumb{
+      position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;
+      cursor:pointer;background:#111;border:1px solid rgba(255,255,255,0.1);
+    }
+    .review-thumb img{width:100%;height:100%;object-fit:cover;filter:brightness(0.85);transition:all 0.3s}
+    .review-thumb:hover img{filter:brightness(1);transform:scale(1.05)}
+    .review-thumb iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+    .review-thumb .play-icon{
+      position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      width:50px;height:35px;background:rgba(255,255,255,0.9);border-radius:8px;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 4px 15px rgba(0,0,0,0.4);transition:all 0.3s;
+    }
+    .review-thumb .play-icon::before{
+      content:'';margin-left:4px;
+      border-left:14px solid #000;border-top:8px solid transparent;border-bottom:8px solid transparent;
+    }
+    .review-thumb:hover .play-icon{transform:translate(-50%,-50%) scale(1.1)}
+    
+    /* Community Results Image */
+    .community-results{
+      margin:20px auto;border-radius:12px;overflow:hidden;
+      border:1px solid rgba(255,255,255,0.1);max-width:100%;
+    }
+    .community-results img{width:100%;display:block}
+    
+    /* FAQ Accordion */
+    .faq-list{display:flex;flex-direction:column;gap:8px;margin:16px 0}
+    .faq-item-accordion{
+      background:#111;border:1px solid rgba(255,255,255,0.08);
+      border-radius:10px;overflow:hidden;transition:all 0.3s;
+    }
+    .faq-item-accordion:hover{border-color:rgba(0,255,136,0.3)}
+    .faq-question{
+      padding:14px 40px 14px 16px;cursor:pointer;position:relative;
+      font-weight:700;font-size:14px;color:#fff;
+    }
+    .faq-question::after{
+      content:'';position:absolute;right:14px;top:50%;margin-top:-5px;
+      width:8px;height:8px;border-right:2px solid #fff;border-bottom:2px solid #fff;
+      transform:rotate(45deg);transition:transform 0.3s;
+    }
+    .faq-item-accordion.open .faq-question::after{transform:rotate(-135deg)}
+    .faq-item-accordion.open .faq-question{color:var(--green);border-bottom:1px solid rgba(0,255,136,0.2)}
+    .faq-answer{
+      max-height:0;overflow:hidden;transition:max-height 0.4s ease;
+      background:#0a0a0f;
+    }
+    .faq-item-accordion.open .faq-answer{max-height:500px}
+    .faq-answer-inner{padding:14px 16px;font-size:13px;line-height:1.7;color:var(--text-dim)}
+    .faq-answer-inner a{color:var(--green)}
+    
+    /* Take Action Section */
+    .take-action-badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 14px;border-radius:999px;
+      background:#111;border:1px solid rgba(255,255,255,0.12);
+      box-shadow:0 4px 15px rgba(0,0,0,0.3);
+      margin:0 auto 12px;color:#fff;font-size:12px;font-weight:700;
+    }
+    .take-action-divider{width:2px;height:20px;background:var(--green);margin:8px auto;border-radius:1px}
+    .take-action-title{font-size:24px;font-weight:800;color:#fff;margin:8px 0 16px;text-align:center}
+    .take-action-subtitle{font-size:16px;color:var(--text-dim);margin:8px 0 16px;text-align:center}
+    
+    /* LIVE SESSIONS SECTION */
+    .live-section{background:linear-gradient(180deg,var(--bg) 0%,#0a1a12 50%,var(--bg) 100%);position:relative;overflow:hidden}
+    .live-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(0,255,136,0.08) 0%,transparent 60%);pointer-events:none}
+    .live-schedule{
+      display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;
+      margin:30px 0;
+    }
+    .live-time{
+      display:flex;align-items:center;gap:10px;
+      padding:16px 28px;
+      background:linear-gradient(135deg,rgba(0,255,136,0.15),rgba(0,255,136,0.05));
+      border:1px solid rgba(0,255,136,0.3);
+      border-radius:16px;
+      font-size:20px;font-weight:700;color:var(--green);
+      box-shadow:0 8px 30px rgba(0,255,136,0.15);
+      animation:timePulse 3s ease-in-out infinite;
+    }
+    @keyframes timePulse{0%,100%{box-shadow:0 8px 30px rgba(0,255,136,0.15)}50%{box-shadow:0 12px 40px rgba(0,255,136,0.25)}}
+    .live-time-icon{font-size:24px}
+    .live-platforms{
+      display:flex;gap:16px;justify-content:center;flex-wrap:wrap;
+      margin:30px 0;
+    }
+    .platform-btn{
+      display:flex;align-items:center;gap:10px;
+      padding:16px 28px;border-radius:14px;
+      font-weight:700;text-transform:uppercase;letter-spacing:1px;
+      color:#fff;text-decoration:none;font-size:14px;
+      transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow:0 8px 25px rgba(0,0,0,0.3);
+      position:relative;overflow:hidden;
+    }
+    .platform-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);transform:translateX(-100%);transition:transform 0.6s}
+    .platform-btn:hover::before{transform:translateX(100%)}
+    .platform-btn:hover{transform:translateY(-5px) scale(1.05);box-shadow:0 15px 40px rgba(0,0,0,0.4)}
+    .platform-btn.tiktok{background:linear-gradient(135deg,#00f2ea,#ff0050)}
+    .platform-btn.youtube{background:linear-gradient(135deg,#ff4444,#cc0000)}
+    .platform-btn.twitch{background:linear-gradient(135deg,#9146ff,#6441a5)}
+    .platform-icon{font-size:20px}
+    .live-feature-video{
+      max-width:800px;margin:40px auto;
+      border-radius:20px;overflow:hidden;
+      border:2px solid rgba(0,255,136,0.3);
+      box-shadow:0 20px 60px rgba(0,255,136,0.15);
+      aspect-ratio:16/9;position:relative;
+    }
+    .live-feature-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+    .live-headline{
+      font-size:clamp(28px,5vw,42px);font-weight:800;
+      text-align:center;margin:30px 0 10px;
+      line-height:1.2;
+    }
+    .live-headline .highlight{
+      color:var(--green);
+      text-shadow:0 0 30px rgba(0,255,136,0.5);
+    }
+    .live-subheadline{
+      font-size:16px;color:var(--text-dim);text-align:center;
+      max-width:600px;margin:0 auto 30px;
+    }
+
+    /* VIDEO REVIEWS SECTION */
+    .reviews-section{background:linear-gradient(180deg,var(--bg-card) 0%,var(--bg) 100%);position:relative}
+    .reviews-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(0,229,255,0.05) 0%,transparent 60%);pointer-events:none}
+    .video-reviews-grid{
+      display:grid;gap:16px;
+      grid-template-columns:repeat(2,1fr);
+      margin:30px 0;
+    }
+    @media(min-width:640px){.video-reviews-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(min-width:900px){.video-reviews-grid{grid-template-columns:repeat(4,1fr)}}
+    .video-review-card{
+      position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;
+      cursor:pointer;background:#111;
+      border:2px solid rgba(255,255,255,0.08);
+      transition:all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .video-review-card:hover{
+      border-color:var(--green);
+      transform:translateY(-5px) scale(1.02);
+      box-shadow:0 15px 40px rgba(0,255,136,0.2);
+    }
+    .video-review-card img{width:100%;height:100%;object-fit:cover;filter:brightness(0.8);transition:all 0.4s}
+    .video-review-card:hover img{filter:brightness(1)}
+    .video-review-card iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+    .video-review-play{
+      position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      width:60px;height:42px;background:rgba(255,255,255,0.95);border-radius:10px;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 6px 25px rgba(0,0,0,0.5);transition:all 0.3s;
+    }
+    .video-review-play::before{
+      content:'';margin-left:5px;
+      border-left:16px solid #000;border-top:10px solid transparent;border-bottom:10px solid transparent;
+    }
+    .video-review-card:hover .video-review-play{transform:translate(-50%,-50%) scale(1.15)}
+    .community-collage{
+      margin:40px auto;max-width:1000px;
+      border-radius:20px;overflow:hidden;
+      border:2px solid rgba(255,255,255,0.1);
+      box-shadow:0 20px 60px rgba(0,0,0,0.3);
+    }
+    .community-collage img{width:100%;display:block}
+
     /* RESULTS */
     .results-section{background:linear-gradient(180deg,var(--bg-card) 0%,var(--bg) 100%);position:relative;z-index:1}
     .results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:60px}
@@ -985,18 +1322,23 @@
     .faq-item.open .faq-answer{max-height:300px}
     .faq-answer-inner{padding:0 24px 24px;font-size:14px;color:var(--text-dim);line-height:1.8}
     
-    /* BROKERS */
-    .brokers-section{background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:60px 0;overflow:hidden;position:relative;z-index:1}
-    .brokers-section::before{content:'';position:absolute;left:0;top:0;bottom:0;width:100px;background:linear-gradient(90deg,var(--bg-card),transparent);z-index:2}
-    .brokers-section::after{content:'';position:absolute;right:0;top:0;bottom:0;width:100px;background:linear-gradient(270deg,var(--bg-card),transparent);z-index:2}
-    .brokers-title{text-align:center;font-size:14px;color:var(--text-muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:40px;animation:fadeInUp 0.6s ease-out}
-    .brokers-marquee{display:flex;gap:60px;animation:marquee 25s linear infinite}
-    .brokers-marquee:hover{animation-play-state:paused}
-    .broker-logo{font-size:20px;font-weight:700;color:var(--text-muted);white-space:nowrap;opacity:0.5;transition:all 0.4s;position:relative}
-    .broker-logo::after{content:'';position:absolute;bottom:-5px;left:0;width:0;height:2px;background:var(--green);transition:width 0.3s}
-    .broker-logo:hover{opacity:1;color:var(--green);transform:scale(1.1)}
-    .broker-logo:hover::after{width:100%}
-    @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+    /* FEATURED IN */
+    .featured-section{background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:30px 0;position:relative;z-index:1}
+    .featured-title{text-align:center;font-size:12px;color:var(--green);text-transform:uppercase;letter-spacing:2px;margin-bottom:20px;font-weight:700}
+    .featured-logos{display:flex;gap:40px;justify-content:center;align-items:center;flex-wrap:wrap;padding:0 20px}
+    .featured-logo{
+      font-size:18px;font-weight:700;color:rgba(255,255,255,0.7);
+      letter-spacing:1px;text-transform:uppercase;
+      display:flex;align-items:center;gap:6px;
+      transition:color 0.3s;line-height:1.2;text-align:center;
+    }
+    .featured-logo:hover{color:#fff}
+    .featured-logo em{font-style:italic;color:var(--green)}
+    .featured-logo .nb-icon{font-size:16px}
+    @media(max-width:768px){
+      .featured-logos{gap:24px}
+      .featured-logo{font-size:14px}
+    }
     
     /* CTA */
     .cta-section{background:linear-gradient(180deg,var(--bg) 0%,rgba(0,255,136,0.03) 100%);padding:120px 0;position:relative;z-index:1}
@@ -1904,7 +2246,7 @@
       <a href="#results" class="nav-link">Results</a>
       <a href="#why" class="nav-link">Why Us</a>
       <a href="#faq" class="nav-link">FAQ</a>
-      <a href="#start" class="nav-cta">Get Started Free →</a>
+      <a href="https://client.abbado.com/_akapwc" target="_blank" class="nav-cta">Get Started Free →</a>
     </div>
     <div class="mobile-menu"><span></span><span></span><span></span></div>
   </nav>
@@ -1919,6 +2261,17 @@
         <span class="green">Per Day Trading</span>
       </h1>
       <p class="hero-subtitle">Unlocks access to the proven $10B Range Bars System that turns market volatility into consistent profits. No customers. No products. No sales. Just pure trading profit.</p>
+      
+      <!-- HERO VIDEO -->
+      <div class="hero-video-wrapper reveal">
+        <div class="hero-video" id="heroVideo" data-yt="Tx69YbrsMeo">
+          <img src="https://i.ytimg.com/vi/Tx69YbrsMeo/hqdefault.jpg" alt="I make $24,000 In 2 Minutes">
+          <div class="hero-video-play">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+          </div>
+        </div>
+      </div>
+      
       <a href="#start" class="hero-cta">
         Start Your Trading Journey →
         <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" fill="currentColor"/></svg>
@@ -1947,7 +2300,7 @@
           <div class="stat-label">System Volume Tracked</div>
         </div>
         <div class="stat-item stagger-item">
-          <div class="stat-value" data-count="97.3">0%</div>
+          <div class="stat-value" data-count="100">0%</div>
           <div class="stat-label">Member Satisfaction Rate</div>
         </div>
         <div class="stat-item stagger-item">
@@ -2005,7 +2358,15 @@
 
       <div class="steps-container reveal-flip">
         <!-- MAIN STEP 1 BUTTON -->
-        <a href="https://abbado.com" target="_blank" class="step-main">
+        <a href="https://client.abbado.com/_akapwc" target="_blank" class="step-main" onclick="unlockSteps()">
+          <div class="pulse-ring"></div>
+          <div class="shimmer"></div>
+          <span class="particle"></span>
+          <span class="particle"></span>
+          <span class="particle"></span>
+          <span class="particle"></span>
+          <span class="particle"></span>
+          <span class="particle"></span>
           <span class="step-main-label">Step 1 — Start Here</span>
           <span class="step-main-title">Register on Abbado.com</span>
           <span class="step-main-desc">Use a licensed & regulated trading platform with no fees. Safe & Secure.</span>
@@ -2015,64 +2376,27 @@
         </a>
 
         <!-- LOCKED STEPS 2-4 -->
-        <div class="steps-locked-wrapper">
-          <div class="steps-locked-overlay" onclick="alert('Complete Step 1 first by registering on Abbado.com')">
-            <span class="steps-locked-text">👆 Click Here After Completing Step 1</span>
+        <div class="steps-locked-wrapper" id="stepsLocked">
+          <div class="steps-locked-overlay" onclick="unlockSteps()">
+            <span class="steps-locked-text">👆 Complete Step 1 to Unlock</span>
           </div>
           <div class="steps-locked-grid">
-            <div class="step-locked-card">
+            <a href="https://www.justsimpletrading.org" target="_blank" class="step-locked-card">
               <div class="step-locked-num">2</div>
               <div class="step-locked-label">Step 2</div>
               <div class="step-locked-title">Access $10 Range Bars System</div>
-            </div>
-            <div class="step-locked-card">
+            </a>
+            <a href="https://www.skool.com/justsimpletrading/classroom" target="_blank" class="step-locked-card">
               <div class="step-locked-num">3</div>
               <div class="step-locked-label">Step 3</div>
               <div class="step-locked-title">Access All Premium Trainings</div>
-            </div>
-            <div class="step-locked-card">
+            </a>
+            <a href="https://discord.gg/8BvKFEBUwx" target="_blank" class="step-locked-card">
               <div class="step-locked-num">4</div>
               <div class="step-locked-label">Step 4</div>
               <div class="step-locked-title">Join Our Free Discord</div>
-            </div>
+            </a>
           </div>
-        </div>
-      </div>
-
-      <!-- AKAPWC-STYLE ACCORDION BARS -->
-      <div class="action-accordions stagger-children">
-        <div class="action-bar stagger-item" onclick="toggleActionBar(this)">
-          <span class="action-bar-text">– Join Our Free Daily Profit Sessions –</span>
-          <span class="action-bar-icon">∨</span>
-        </div>
-        <div class="action-bar-content">
-          <p>Join our daily live trading sessions where we trade together as a community. Watch real trades happen in real-time and learn from experienced traders. Sessions run Monday through Friday during peak market hours. Get notified via Discord when sessions go live.</p>
-        </div>
-
-        <div class="action-bar stagger-item" onclick="toggleActionBar(this)">
-          <span class="action-bar-text">– Video Reviews –</span>
-          <span class="action-bar-icon">∨</span>
-        </div>
-        <div class="action-bar-content">
-          <p>See what our community members have to say about their experience with the $10B Range Bars System. Real testimonials from real traders who have transformed their trading results. Success stories updated weekly.</p>
-        </div>
-
-        <div class="action-bar stagger-item" onclick="toggleActionBar(this)">
-          <span class="action-bar-text">– Take Action –</span>
-          <span class="action-bar-icon">∨</span>
-        </div>
-        <div class="action-bar-content">
-          <p>Ready to start your journey? Complete Step 1 by registering on Abbado.com to unlock all the resources, trainings, and community access. The sooner you start, the sooner you can begin implementing the strategies that have helped thousands of traders achieve consistent profits.</p>
-        </div>
-
-        <div class="action-bar stagger-item" onclick="toggleActionBar(this)">
-          <span class="action-bar-text">– FAQ –</span>
-          <span class="action-bar-icon">∨</span>
-        </div>
-        <div class="action-bar-content">
-          <p><strong>How much money do I need?</strong> Start with $100-$500 to learn.</p>
-          <p><strong>Do I need experience?</strong> No, we teach everything from scratch.</p>
-          <p><strong>Is the Discord really free?</strong> Yes, 100% free after completing Step 1.</p>
         </div>
       </div>
     </div>
@@ -2167,6 +2491,137 @@
     </div>
   </section>
 
+  <!-- LIVE SESSIONS -->
+  <section id="live" class="live-section section">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag">Live Sessions</div>
+        <h2 class="section-title">Join Our Free Daily Profit Sessions</h2>
+        <p class="section-subtitle">Watch real trades happen in real-time with our community</p>
+      </div>
+      
+      <div class="section-divider"></div>
+
+      <div class="live-schedule reveal">
+        <div class="live-time">
+          <span class="live-time-icon">🔴</span>
+          <span>1:00 PM EST</span>
+        </div>
+        <div class="live-time">
+          <span class="live-time-icon">🔴</span>
+          <span>11:00 PM EST</span>
+        </div>
+      </div>
+
+      <div class="live-platforms reveal">
+        <a href="https://www.tiktok.com/@realakapwc" target="_blank" class="platform-btn tiktok">
+          <span class="platform-icon">📱</span>
+          <span>TikTok</span>
+        </a>
+        <a href="https://www.youtube.com/@akapwc" target="_blank" class="platform-btn youtube">
+          <span class="platform-icon">▶️</span>
+          <span>YouTube</span>
+        </a>
+        <a href="https://www.twitch.tv/realakapwc" target="_blank" class="platform-btn twitch">
+          <span class="platform-icon">🎮</span>
+          <span>Twitch</span>
+        </a>
+      </div>
+
+      <div class="live-headline reveal">
+        Learn How We <span class="highlight">Cracked</span><br>
+        <span class="highlight">The Code</span> On Automated Trading
+      </div>
+      <p class="live-subheadline reveal">From zero to over $93k in less than 4 months after building automated trading systems on abbado.com</p>
+
+      <div class="live-feature-video reveal">
+        <iframe src="https://www.youtube.com/embed/ZZdnq76TWTU?rel=0&modestbranding=1&playsinline=1"
+                title="How We Cracked The Code"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIDEO REVIEWS -->
+  <section id="reviews" class="reviews-section section">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag">Testimonials</div>
+        <h2 class="section-title">Video Reviews From Our Community</h2>
+        <p class="section-subtitle">See how countless others transformed their trading with our system</p>
+      </div>
+      
+      <div class="section-divider"></div>
+
+      <div class="video-reviews-grid reveal" id="videoReviewsGrid">
+        <div class="video-review-card" data-yt="t2AjYZhwtfU"><img src="https://i.ytimg.com/vi/t2AjYZhwtfU/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="ka-983JO_x4"><img src="https://i.ytimg.com/vi/ka-983JO_x4/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="5Cljb6WLvN8"><img src="https://i.ytimg.com/vi/5Cljb6WLvN8/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="4rt1qlwn13A"><img src="https://i.ytimg.com/vi/4rt1qlwn13A/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="JYP3yFS9PVQ"><img src="https://i.ytimg.com/vi/JYP3yFS9PVQ/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="XTqonYhMkYU"><img src="https://i.ytimg.com/vi/XTqonYhMkYU/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="9I8E6rkr-6Y"><img src="https://i.ytimg.com/vi/9I8E6rkr-6Y/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="jco5woLGDCQ"><img src="https://i.ytimg.com/vi/jco5woLGDCQ/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="VOLoJ_qJ95o"><img src="https://i.ytimg.com/vi/VOLoJ_qJ95o/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="dERpOuQuhqo"><img src="https://i.ytimg.com/vi/dERpOuQuhqo/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="4UfkXtE9RaM"><img src="https://i.ytimg.com/vi/4UfkXtE9RaM/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="eDR8mV_YSfc"><img src="https://i.ytimg.com/vi/eDR8mV_YSfc/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="3P6gljPFR1U"><img src="https://i.ytimg.com/vi/3P6gljPFR1U/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="xdFo_F0sZVg"><img src="https://i.ytimg.com/vi/xdFo_F0sZVg/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="iRuYnEWYs2U"><img src="https://i.ytimg.com/vi/iRuYnEWYs2U/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="u3M0vf0GIXE"><img src="https://i.ytimg.com/vi/u3M0vf0GIXE/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="r_2qfikVPss"><img src="https://i.ytimg.com/vi/r_2qfikVPss/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="ZIdxCdtzPdY"><img src="https://i.ytimg.com/vi/ZIdxCdtzPdY/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="26PkFdh4fKE"><img src="https://i.ytimg.com/vi/26PkFdh4fKE/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="djWc8fTbtlw"><img src="https://i.ytimg.com/vi/djWc8fTbtlw/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="9FHz91ltSPI"><img src="https://i.ytimg.com/vi/9FHz91ltSPI/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="xZhzkNltg5s"><img src="https://i.ytimg.com/vi/xZhzkNltg5s/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="Q3X9qjTdDRU"><img src="https://i.ytimg.com/vi/Q3X9qjTdDRU/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="OSNiS9h21ks"><img src="https://i.ytimg.com/vi/OSNiS9h21ks/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="7-alxfbcEFQ"><img src="https://i.ytimg.com/vi/7-alxfbcEFQ/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="VB0Lu6t-PzM"><img src="https://i.ytimg.com/vi/VB0Lu6t-PzM/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="e85TAVHo4A8"><img src="https://i.ytimg.com/vi/e85TAVHo4A8/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="m-Te0bFYNKg"><img src="https://i.ytimg.com/vi/m-Te0bFYNKg/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="ZzUlThcO3wQ"><img src="https://i.ytimg.com/vi/ZzUlThcO3wQ/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="8c-pPjuODug"><img src="https://i.ytimg.com/vi/8c-pPjuODug/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="k3ScnDEA9aM"><img src="https://i.ytimg.com/vi/k3ScnDEA9aM/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="9WCxwIPx9ac"><img src="https://i.ytimg.com/vi/9WCxwIPx9ac/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="UZLPrnS0SdI"><img src="https://i.ytimg.com/vi/UZLPrnS0SdI/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="WTXD-OocOiM"><img src="https://i.ytimg.com/vi/WTXD-OocOiM/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="_HZHN8D0DiI"><img src="https://i.ytimg.com/vi/_HZHN8D0DiI/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="Ir63rd3Gnyg"><img src="https://i.ytimg.com/vi/Ir63rd3Gnyg/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="ECUzksZ3uy8"><img src="https://i.ytimg.com/vi/ECUzksZ3uy8/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="B56ED25zkY8"><img src="https://i.ytimg.com/vi/B56ED25zkY8/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="EjUC2otmh3k"><img src="https://i.ytimg.com/vi/EjUC2otmh3k/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="FEfsxHP2QIo"><img src="https://i.ytimg.com/vi/FEfsxHP2QIo/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="Qe5C2gxf_xk"><img src="https://i.ytimg.com/vi/Qe5C2gxf_xk/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="XXlVP3iMxIA"><img src="https://i.ytimg.com/vi/XXlVP3iMxIA/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="lfMoXFlcPXk"><img src="https://i.ytimg.com/vi/lfMoXFlcPXk/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="bDJG1SdiBQE"><img src="https://i.ytimg.com/vi/bDJG1SdiBQE/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="HtIkgudP6Fk"><img src="https://i.ytimg.com/vi/HtIkgudP6Fk/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="279X5fgfeK8"><img src="https://i.ytimg.com/vi/279X5fgfeK8/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="aSm_wzr1QSc"><img src="https://i.ytimg.com/vi/aSm_wzr1QSc/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="QQf_mSZn1SA"><img src="https://i.ytimg.com/vi/QQf_mSZn1SA/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="X5g-VttMbdg"><img src="https://i.ytimg.com/vi/X5g-VttMbdg/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="d0Icdw2Ynew"><img src="https://i.ytimg.com/vi/d0Icdw2Ynew/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="niQ5RADoO50"><img src="https://i.ytimg.com/vi/niQ5RADoO50/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="GKfVrhrmWTM"><img src="https://i.ytimg.com/vi/GKfVrhrmWTM/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="bs1JWO9lonw"><img src="https://i.ytimg.com/vi/bs1JWO9lonw/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="SXTbUqBdj8c"><img src="https://i.ytimg.com/vi/SXTbUqBdj8c/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="HyhJcbuWstU"><img src="https://i.ytimg.com/vi/HyhJcbuWstU/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="KaxCswCBfr8"><img src="https://i.ytimg.com/vi/KaxCswCBfr8/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="_ykd3XRXHKE"><img src="https://i.ytimg.com/vi/_ykd3XRXHKE/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="T3tHUUF3GXc"><img src="https://i.ytimg.com/vi/T3tHUUF3GXc/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+        <div class="video-review-card" data-yt="YVZW49sj4jg"><img src="https://i.ytimg.com/vi/YVZW49sj4jg/hqdefault.jpg" alt="Review"><span class="video-review-play"></span></div>
+      </div>
+
+      <div class="community-collage reveal">
+        <img src="https://images.clickfunnels.com/af/188a701c35403da692d2a9916d2b94/wwwwwww.png" alt="Community Results" loading="lazy">
+      </div>
+    </div>
+  </section>
+
   <!-- FAQ -->
   <section id="faq" class="faq-section section">
     <div class="container">
@@ -2181,81 +2636,181 @@
       <div class="faq-grid stagger-children">
         <div class="faq-item stagger-item">
           <div class="faq-header" onclick="toggleFaq(this)">
-            <span class="faq-question">How much money do I need to start trading?</span>
+            <span class="faq-question">How do I start using JustSimpleTrading?</span>
             <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
           </div>
           <div class="faq-answer">
-            <div class="faq-answer-inner">You can start with as little as $100-$500 to begin learning and practicing with small positions. Many of our successful members started with minimal capital and grew their accounts over time using proper risk management.</div>
+            <div class="faq-answer-inner">It's simple. Once you register, the Custom Systems, Charts, and Indicator tools will be available to you in your login. Just login to the website and start using our Charts now!</div>
           </div>
         </div>
 
         <div class="faq-item stagger-item">
           <div class="faq-header" onclick="toggleFaq(this)">
-            <span class="faq-question">Do I need any prior trading experience?</span>
+            <span class="faq-question">Are there any fees?</span>
             <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
           </div>
           <div class="faq-answer">
-            <div class="faq-answer-inner">No prior experience is required. Our training library is designed to take complete beginners from zero to profitable trading. We cover everything from basics to advanced strategies.</div>
+            <div class="faq-answer-inner">There are no fees. Once your trading account is setup you can access the Live Trade Room Charts in your login right away. There are no hidden fees, no costs, and we provide you lifelong support and assistance as long as you need it!</div>
           </div>
         </div>
 
         <div class="faq-item stagger-item">
           <div class="faq-header" onclick="toggleFaq(this)">
-            <span class="faq-question">What is the Range Bars trading system?</span>
+            <span class="faq-question">How does JustSimpleTrading make money?</span>
             <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
           </div>
           <div class="faq-answer">
-            <div class="faq-answer-inner">Range Bars is a price-based charting method that filters out market noise and shows only significant price movements. Our $10B system uses this methodology to identify high-probability trading setups that institutional traders use.</div>
+            <div class="faq-answer-inner">JustSimpleTrading makes all of its money from private investments and from referral commissions and partners. You can learn more by emailing support@justsimpletrading.com.</div>
           </div>
         </div>
 
         <div class="faq-item stagger-item">
           <div class="faq-header" onclick="toggleFaq(this)">
-            <span class="faq-question">Is the Discord community really free?</span>
+            <span class="faq-question">Do I need any experience to start?</span>
             <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
           </div>
           <div class="faq-answer">
-            <div class="faq-answer-inner">Yes, our Discord community, daily live sessions, and core trainings are completely free to access. You just need to complete Step 1 (registering on Abbado.com) to unlock full access.</div>
+            <div class="faq-answer-inner">None at all. In fact the less experience you have the better. Experience and existing ideas can distract you from learning new things and paralyze your actions as your mind attempts to hang onto old habits. Anyone can begin to get rid of all the noise in order to get it right the first time.</div>
           </div>
         </div>
 
         <div class="faq-item stagger-item">
           <div class="faq-header" onclick="toggleFaq(this)">
-            <span class="faq-question">How long before I see results?</span>
+            <span class="faq-question">Does JustSimpleTrading open my trading account for me?</span>
             <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
           </div>
           <div class="faq-answer">
-            <div class="faq-answer-inner">Results vary based on your dedication and practice. Some members see their first profitable trades within weeks, while others take 1-2 months to become consistent. The key is following the system and being patient.</div>
+            <div class="faq-answer-inner">No. JustSimpleTrading does not accept and does not allow the sending of trading funds to JustSimpleTrading. Instead we guide you with the correct knowledge to know exactly how to trade on your own and keep your money safe in your complete control.</div>
           </div>
         </div>
 
         <div class="faq-item stagger-item">
           <div class="faq-header" onclick="toggleFaq(this)">
-            <span class="faq-question">What markets can I trade with this system?</span>
+            <span class="faq-question">Is this available anywhere else?</span>
             <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
           </div>
           <div class="faq-answer">
-            <div class="faq-answer-inner">The Range Bars system works across multiple markets including forex, stocks, indices, commodities, and cryptocurrencies. The methodology is universal and adapts to any liquid market.</div>
+            <div class="faq-answer-inner">No. The Systems and Tools provided to traders here are proprietary algorithms, sequences, and pattern recognition tools built for traders, by traders. You cannot find this system or any of its components anywhere else. Our systems are a result of 15+ years of live trading in the markets after trying thousands of different indicators and strategies one by one.</div>
           </div>
         </div>
 
         <div class="faq-item stagger-item">
           <div class="faq-header" onclick="toggleFaq(this)">
-            <span class="faq-question">Why do I need to register on Abbado.com first?</span>
+            <span class="faq-question">Is this theories or real world knowledge?</span>
             <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
           </div>
           <div class="faq-answer">
-            <div class="faq-answer-inner">Abbado.com is our recommended licensed and regulated trading platform that integrates with our system. It's safe, secure, has no hidden fees, and provides the tools you need to execute the strategies we teach.</div>
+            <div class="faq-answer-inner">What you will get is real world working systems used by us on a daily basis along with the exact rules executed on a daily basis to run a successful trading business long term.</div>
           </div>
         </div>
 
         <div class="faq-item stagger-item">
           <div class="faq-header" onclick="toggleFaq(this)">
-            <span class="faq-question">What kind of support do you provide?</span>
+            <span class="faq-question">If this is so good, why are you giving away all of your secrets?</span>
             <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
           </div>
           <div class="faq-answer">
-            <div class="faq-answer-inner">We provide support through our Discord community 24/7, daily live trading sessions, comprehensive video training, and direct access to experienced traders who can answer your questions.</div>
+            <div class="faq-answer-inner">Our secrets will never reach 1% of the human population. With so many myths and misinformation online related to trading we aim to demystify this industry and equip traders with the correct knowledge. Having tested and built thousands of trading systems using 50+ years of live market data we know exactly what NOT to do. Knowledge and tools are meaningless unless you apply them and take action.</div>
+          </div>
+        </div>
+
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">How long does it take to learn?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">This may take 30 minutes, a few hours, days, or a few weeks to entirely grasp and understand. This aspect entirely depends on you and your commitment level. We provide you the exact daily processes and steps we take to trade and run our business. It only takes a few minutes a day to implement our Custom Systems and Tools into your life.</div>
+          </div>
+        </div>
+
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">What do I need?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Just a laptop and a few minutes a day.</div>
+          </div>
+        </div>
+
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">How much technical analysis or news based trading is used?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Every market variable has been accounted for including all indicators, technical analysis, fundamental analysis, news, and human bias variables. With every aspect of the market isolated and converted into a quantified system we provide you the exact strategy necessary to execute trades safely and long term on a consistent basis.</div>
+          </div>
+        </div>
+
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">What size should my trading account be?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">There are no minimums in sizes. Everything is matched to exact percentage based ratios. This means there is no difference between an account that is $5,000 or $500,000. All trades match the ratio of the balance. Remember, 1% is 1% in both accounts. Everything is a matter of perception and scale.</div>
+          </div>
+        </div>
+
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">Will this work in any market and any time frame?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Yes. All markets are inherently lines moving up and down on a screen. Once you understand the markets in their simplest form you will understand that they can be organized into exact range based patterns. This systematic approach allows you to customize your charts to any size to trade 24/7. All markets are the same.</div>
+          </div>
+        </div>
+
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">How many trades per day?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">With the standard setup there will be approximately 3-5 trades per hour and more markets added in the future to make 7-10 trades per hour. These cycles can be executed once or twice a day to build a consistent habit of systematic trading expertise.</div>
+          </div>
+        </div>
+
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">I am considering other trading systems, how can I decide?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">We give you everything for free because we use it ourselves. It's important to understand the difference between training that is just made to take your money, and systems that are designed to be lifelong tools that continue producing results no matter what market conditions exist. Our systems will work forever.</div>
+          </div>
+        </div>
+
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">I don't want to trade right now, should I still do this?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Yes. Our system and tools allow individuals who do not want to invest to make money long term. Learn how trading referrals work and grow your residual income base by collecting profits from trading transactions. This is a great way to rapidly grow your income base without any investments.</div>
+          </div>
+        </div>
+
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">Can I trade longer than 20-60 minutes per day?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Yes. There is no limit to the amount of time you spend using our Custom Systems and Charting Tools. You can change your schedule to trade whenever you want. There is no difference when it comes to our simplified approach. All markets and all time frames are the exact same.</div>
+          </div>
+        </div>
+
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">What about losses?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Trading strategies cannot exist without losing trades. It is inevitable. By following systematic and exact rules our Custom Systems are able to identify key turning points in market movement to identify exact entries and exits on every trade. Once you understand this process you will be able to trade without stress, worry, or confusion. Everything is exactly defined to give you confidence and peace of mind while trading.</div>
           </div>
         </div>
       </div>
@@ -2263,25 +2818,14 @@
   </section>
 
   <!-- BROKERS -->
-  <section class="brokers-section">
-    <div class="brokers-title reveal">Compatible with Major Trading Platforms</div>
-    <div class="brokers-marquee">
-      <span class="broker-logo">MetaTrader 4</span>
-      <span class="broker-logo">MetaTrader 5</span>
-      <span class="broker-logo">TradingView</span>
-      <span class="broker-logo">cTrader</span>
-      <span class="broker-logo">NinjaTrader</span>
-      <span class="broker-logo">Abbado</span>
-      <span class="broker-logo">ThinkOrSwim</span>
-      <span class="broker-logo">Interactive Brokers</span>
-      <span class="broker-logo">MetaTrader 4</span>
-      <span class="broker-logo">MetaTrader 5</span>
-      <span class="broker-logo">TradingView</span>
-      <span class="broker-logo">cTrader</span>
-      <span class="broker-logo">NinjaTrader</span>
-      <span class="broker-logo">Abbado</span>
-      <span class="broker-logo">ThinkOrSwim</span>
-      <span class="broker-logo">Interactive Brokers</span>
+  <!-- FEATURED IN -->
+  <section class="featured-section">
+    <div class="featured-title reveal">Featured In:</div>
+    <div class="featured-logos">
+      <span class="featured-logo">BUSINESS<br>INSIDER</span>
+      <span class="featured-logo">barchart</span>
+      <span class="featured-logo">USA<em>NEWS</em></span>
+      <span class="featured-logo"><span class="nb-icon">📰</span> NEWSBREAK</span>
     </div>
   </section>
 
@@ -2291,7 +2835,7 @@
       <div class="cta-card reveal-scale glow-on-scroll pulse-on-scroll">
         <h2 class="cta-title">Ready to Start Your Trading Journey?</h2>
         <p class="cta-subtitle">Join 8,000+ traders who are already making consistent profits with the $10B Range Bars System</p>
-        <a href="https://abbado.com" class="cta-btn" target="_blank">
+        <a href="https://client.abbado.com/_akapwc" class="cta-btn" target="_blank">
           Register on Abbado.com →
         </a>
         <p class="cta-note">🔒 Safe & Secure • Licensed & Regulated • No Hidden Fees</p>
@@ -2339,12 +2883,31 @@
 
   <!-- DISCORD FLOAT -->
   <div class="discord-float">
-    <a href="#" class="discord-btn" target="_blank">
+    <a href="https://discord.gg/8BvKFEBUwx" class="discord-btn" target="_blank">
       <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
     </a>
   </div>
 
   <script>
+    // ========== UNLOCK STEPS FUNCTION ==========
+    function unlockSteps() {
+      const stepsWrapper = document.getElementById('stepsLocked');
+      if (stepsWrapper) {
+        stepsWrapper.classList.add('unlocked');
+        localStorage.setItem('stepsUnlocked', 'true');
+      }
+    }
+
+    // Check if steps were previously unlocked
+    document.addEventListener('DOMContentLoaded', function() {
+      if (localStorage.getItem('stepsUnlocked') === 'true') {
+        const stepsWrapper = document.getElementById('stepsLocked');
+        if (stepsWrapper) {
+          stepsWrapper.classList.add('unlocked');
+        }
+      }
+    });
+
     function toggleFaq(header) {
       const item = header.parentElement;
       const isOpen = item.classList.contains('open');
@@ -2366,6 +2929,38 @@
         content.classList.add('open');
       }
     }
+
+    function toggleFaqItem(item) {
+      const wasOpen = item.classList.contains('open');
+      // Close all FAQ items
+      document.querySelectorAll('.faq-item-accordion').forEach(i => i.classList.remove('open'));
+      // Open clicked one if it wasn't already open
+      if (!wasOpen) {
+        item.classList.add('open');
+      }
+      event.stopPropagation();
+    }
+
+    // Video review click handler - works for all clickable videos
+    document.addEventListener('DOMContentLoaded', function() {
+      // Handle all video cards (video reviews, hero video)
+      document.querySelectorAll('.video-review-card, .review-thumb, .hero-video').forEach(thumb => {
+        thumb.addEventListener('click', function() {
+          const ytId = this.getAttribute('data-yt');
+          if (ytId && !this.dataset.played) {
+            this.dataset.played = '1';
+            const iframe = document.createElement('iframe');
+            iframe.src = 'https://www.youtube.com/embed/' + ytId + '?autoplay=1&rel=0&modestbranding=1&playsinline=1';
+            iframe.title = 'YouTube video';
+            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+            iframe.allowFullscreen = true;
+            iframe.style = 'position:absolute;inset:0;width:100%;height:100%;border:0';
+            this.innerHTML = '';
+            this.appendChild(iframe);
+          }
+        });
+      });
+    });
 
     // ========== SCROLL PROGRESS BAR ==========
     window.addEventListener('scroll', () => {
