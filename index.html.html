@@ -1,0 +1,2643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AKAPWC | $10B Range Bars Trading System</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --green:#00ff88;--green-dim:rgba(0,255,136,0.15);--green-glow:rgba(0,255,136,0.3);
+      --gold:#ffd700;--gold-dim:rgba(255,215,0,0.15);
+      --cyan:#00e5ff;--red:#ff4444;
+      --bg:#000;--bg-card:#0a0f14;--bg-light:#111820;
+      --border:rgba(255,255,255,0.08);--border-green:rgba(0,255,136,0.3);
+      --text:#fff;--text-dim:#9aa5b1;--text-muted:#5a6a7a;
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;position:relative;overflow-x:hidden}
+    
+    /* ANIMATED CHART BACKGROUND */
+    .chart-bg{
+      position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+      opacity:0.12;
+    }
+    .chart-grid{
+      position:absolute;inset:0;
+      background-image:
+        linear-gradient(rgba(0,255,136,0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,136,0.3) 1px, transparent 1px);
+      background-size:80px 40px;
+      mask-image:linear-gradient(180deg, black 0%, transparent 70%);
+    }
+    
+    /* Animated price line */
+    .chart-line{
+      position:absolute;top:30%;left:0;right:0;height:200px;
+      overflow:hidden;
+    }
+    .chart-line svg{
+      position:absolute;left:0;top:0;
+      width:200%;height:100%;
+      animation:chartScroll 20s linear infinite;
+    }
+    @keyframes chartScroll{
+      0%{transform:translateX(0)}
+      100%{transform:translateX(-50%)}
+    }
+    
+    /* Candlesticks */
+    .candlesticks{
+      position:absolute;bottom:20%;left:0;right:0;height:300px;
+      display:flex;align-items:flex-end;justify-content:center;gap:12px;
+      mask-image:linear-gradient(0deg, transparent 0%, black 30%, black 70%, transparent 100%);
+    }
+    .candle{
+      width:8px;border-radius:2px;position:relative;
+      animation:candleGrow 3s ease-in-out infinite;
+    }
+    .candle::before{
+      content:'';position:absolute;left:50%;transform:translateX(-50%);
+      width:2px;background:inherit;
+    }
+    .candle.green{background:var(--green)}
+    .candle.red{background:#ff4444}
+    .candle:nth-child(1){height:60px;animation-delay:0s}
+    .candle:nth-child(2){height:90px;animation-delay:0.2s}
+    .candle:nth-child(3){height:45px;animation-delay:0.4s}
+    .candle:nth-child(4){height:120px;animation-delay:0.6s}
+    .candle:nth-child(5){height:75px;animation-delay:0.8s}
+    .candle:nth-child(6){height:100px;animation-delay:1s}
+    .candle:nth-child(7){height:55px;animation-delay:1.2s}
+    .candle:nth-child(8){height:130px;animation-delay:1.4s}
+    .candle:nth-child(9){height:70px;animation-delay:1.6s}
+    .candle:nth-child(10){height:95px;animation-delay:1.8s}
+    .candle:nth-child(11){height:50px;animation-delay:2s}
+    .candle:nth-child(12){height:110px;animation-delay:2.2s}
+    .candle:nth-child(13){height:65px;animation-delay:2.4s}
+    .candle:nth-child(14){height:85px;animation-delay:2.6s}
+    .candle:nth-child(15){height:140px;animation-delay:2.8s}
+    .candle:nth-child(16){height:60px;animation-delay:0.1s}
+    .candle:nth-child(17){height:100px;animation-delay:0.3s}
+    .candle:nth-child(18){height:75px;animation-delay:0.5s}
+    .candle:nth-child(19){height:115px;animation-delay:0.7s}
+    .candle:nth-child(20){height:55px;animation-delay:0.9s}
+    .candle:nth-child(21){height:90px;animation-delay:1.1s}
+    .candle:nth-child(22){height:125px;animation-delay:1.3s}
+    .candle:nth-child(23){height:70px;animation-delay:1.5s}
+    .candle:nth-child(24){height:80px;animation-delay:1.7s}
+    .candle:nth-child(25){height:105px;animation-delay:1.9s}
+    @keyframes candleGrow{
+      0%,100%{transform:scaleY(1);opacity:0.6}
+      50%{transform:scaleY(1.15);opacity:1}
+    }
+    
+    /* Floating numbers */
+    .chart-numbers{
+      position:absolute;right:5%;top:20%;
+      display:flex;flex-direction:column;gap:30px;
+      font-family:'JetBrains Mono',monospace;
+      font-size:12px;color:var(--green);
+    }
+    .chart-num{animation:numFade 4s ease-in-out infinite}
+    .chart-num:nth-child(1){animation-delay:0s}
+    .chart-num:nth-child(2){animation-delay:0.5s}
+    .chart-num:nth-child(3){animation-delay:1s}
+    .chart-num:nth-child(4){animation-delay:1.5s}
+    .chart-num:nth-child(5){animation-delay:2s}
+    @keyframes numFade{
+      0%,100%{opacity:0.3}
+      50%{opacity:0.8}
+    }
+    
+    /* Moving horizontal lines */
+    .chart-levels{
+      position:absolute;left:0;right:0;top:25%;height:50%;
+      overflow:hidden;
+    }
+    .level-line{
+      position:absolute;left:0;right:0;height:1px;
+      background:linear-gradient(90deg, transparent, var(--green), transparent);
+      animation:levelPulse 5s ease-in-out infinite;
+    }
+    .level-line:nth-child(1){top:10%;animation-delay:0s;opacity:0.4}
+    .level-line:nth-child(2){top:30%;animation-delay:1s;opacity:0.3}
+    .level-line:nth-child(3){top:50%;animation-delay:2s;opacity:0.5}
+    .level-line:nth-child(4){top:70%;animation-delay:3s;opacity:0.3}
+    .level-line:nth-child(5){top:90%;animation-delay:4s;opacity:0.4}
+    @keyframes levelPulse{
+      0%,100%{transform:scaleX(0.5);opacity:0.2}
+      50%{transform:scaleX(1);opacity:0.6}
+    }
+    
+    /* Rising particles */
+    .chart-particles{
+      position:absolute;inset:0;overflow:hidden;
+    }
+    .particle{
+      position:absolute;width:4px;height:4px;
+      background:var(--green);border-radius:50%;
+      animation:particleRise 8s linear infinite;
+      opacity:0;
+    }
+    .particle:nth-child(1){left:10%;animation-delay:0s}
+    .particle:nth-child(2){left:20%;animation-delay:1s}
+    .particle:nth-child(3){left:35%;animation-delay:2s}
+    .particle:nth-child(4){left:50%;animation-delay:3s}
+    .particle:nth-child(5){left:65%;animation-delay:4s}
+    .particle:nth-child(6){left:80%;animation-delay:5s}
+    .particle:nth-child(7){left:90%;animation-delay:6s}
+    .particle:nth-child(8){left:15%;animation-delay:0.5s}
+    .particle:nth-child(9){left:45%;animation-delay:2.5s}
+    .particle:nth-child(10){left:75%;animation-delay:4.5s}
+    @keyframes particleRise{
+      0%{bottom:-10px;opacity:0}
+      10%{opacity:0.8}
+      90%{opacity:0.8}
+      100%{bottom:100%;opacity:0}
+    }
+    
+    /* Volume bars at bottom */
+    .chart-volume{
+      position:absolute;bottom:5%;left:0;right:0;height:80px;
+      display:flex;align-items:flex-end;justify-content:center;gap:6px;
+      mask-image:linear-gradient(90deg, transparent 0%, black 20%, black 80%, transparent 100%);
+    }
+    .vol-bar{
+      width:6px;background:var(--green);border-radius:2px 2px 0 0;
+      animation:volPulse 2s ease-in-out infinite;
+    }
+    .vol-bar:nth-child(odd){background:rgba(0,255,136,0.6)}
+    .vol-bar:nth-child(even){background:rgba(0,229,255,0.4)}
+    .vol-bar:nth-child(1){height:20px;animation-delay:0s}
+    .vol-bar:nth-child(2){height:35px;animation-delay:0.1s}
+    .vol-bar:nth-child(3){height:25px;animation-delay:0.2s}
+    .vol-bar:nth-child(4){height:50px;animation-delay:0.3s}
+    .vol-bar:nth-child(5){height:30px;animation-delay:0.4s}
+    .vol-bar:nth-child(6){height:45px;animation-delay:0.5s}
+    .vol-bar:nth-child(7){height:20px;animation-delay:0.6s}
+    .vol-bar:nth-child(8){height:60px;animation-delay:0.7s}
+    .vol-bar:nth-child(9){height:35px;animation-delay:0.8s}
+    .vol-bar:nth-child(10){height:40px;animation-delay:0.9s}
+    .vol-bar:nth-child(11){height:25px;animation-delay:1s}
+    .vol-bar:nth-child(12){height:55px;animation-delay:1.1s}
+    .vol-bar:nth-child(13){height:30px;animation-delay:1.2s}
+    .vol-bar:nth-child(14){height:70px;animation-delay:1.3s}
+    .vol-bar:nth-child(15){height:40px;animation-delay:1.4s}
+    .vol-bar:nth-child(16){height:35px;animation-delay:1.5s}
+    .vol-bar:nth-child(17){height:50px;animation-delay:1.6s}
+    .vol-bar:nth-child(18){height:25px;animation-delay:1.7s}
+    .vol-bar:nth-child(19){height:45px;animation-delay:1.8s}
+    .vol-bar:nth-child(20){height:30px;animation-delay:1.9s}
+    @keyframes volPulse{
+      0%,100%{transform:scaleY(1)}
+      50%{transform:scaleY(1.3)}
+    }
+    
+    /* Glowing orbs */
+    .chart-glow{
+      position:absolute;border-radius:50%;filter:blur(100px);
+      animation:orbFloat 10s ease-in-out infinite;
+    }
+    .chart-glow-1{top:20%;left:10%;width:300px;height:300px;background:rgba(0,255,136,0.15);animation-delay:0s}
+    .chart-glow-2{top:50%;right:10%;width:250px;height:250px;background:rgba(0,229,255,0.1);animation-delay:3s}
+    .chart-glow-3{bottom:20%;left:30%;width:350px;height:350px;background:rgba(0,255,136,0.08);animation-delay:6s}
+    @keyframes orbFloat{
+      0%,100%{transform:translate(0,0) scale(1)}
+      33%{transform:translate(20px,-30px) scale(1.1)}
+      66%{transform:translate(-20px,20px) scale(0.9)}
+    }
+    
+    /* ========== EXTENDED BACKGROUND GRAPHICS ========== */
+    
+    /* LARGE DECORATIVE CIRCLES */
+    .bg-circle{position:absolute;border-radius:50%;pointer-events:none;opacity:0.03}
+    .bg-circle-1{width:800px;height:800px;border:1px solid var(--green);top:100vh;left:-400px;animation:circleFloat 30s ease-in-out infinite}
+    .bg-circle-2{width:600px;height:600px;border:1px solid var(--cyan);top:180vh;right:-300px;animation:circleFloat 25s ease-in-out infinite reverse}
+    .bg-circle-3{width:500px;height:500px;border:2px solid var(--green);top:280vh;left:-200px;animation:circleFloat 35s ease-in-out infinite}
+    .bg-circle-4{width:700px;height:700px;border:1px solid var(--cyan);top:380vh;right:-350px;animation:circleFloat 28s ease-in-out infinite reverse}
+    .bg-circle-5{width:400px;height:400px;border:1px solid var(--green);top:480vh;left:10%;animation:circleFloat 22s ease-in-out infinite}
+    @keyframes circleFloat{0%,100%{transform:rotate(0deg) scale(1)}50%{transform:rotate(180deg) scale(1.1)}}
+    
+    /* DIAGONAL LINES */
+    .bg-diagonal{position:absolute;width:200%;height:1px;pointer-events:none;opacity:0.04}
+    .bg-diagonal-1{background:linear-gradient(90deg,transparent,var(--green),transparent);top:120vh;left:-50%;transform:rotate(15deg);animation:diagonalMove 20s linear infinite}
+    .bg-diagonal-2{background:linear-gradient(90deg,transparent,var(--cyan),transparent);top:220vh;left:-50%;transform:rotate(-10deg);animation:diagonalMove 25s linear infinite reverse}
+    .bg-diagonal-3{background:linear-gradient(90deg,transparent,var(--green),transparent);top:350vh;left:-50%;transform:rotate(8deg);animation:diagonalMove 18s linear infinite}
+    .bg-diagonal-4{background:linear-gradient(90deg,transparent,var(--cyan),transparent);top:450vh;left:-50%;transform:rotate(-12deg);animation:diagonalMove 22s linear infinite reverse}
+    @keyframes diagonalMove{0%{opacity:0.02}50%{opacity:0.06}100%{opacity:0.02}}
+    
+    /* HEXAGON GRID */
+    .bg-hexagons{position:absolute;width:100%;height:400px;pointer-events:none;opacity:0.03;overflow:hidden}
+    .bg-hexagons-1{top:150vh}
+    .bg-hexagons-2{top:350vh}
+    .bg-hexagons-3{top:550vh}
+    .hexagon{position:absolute;width:60px;height:70px;background:transparent;border:1px solid var(--green);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);animation:hexPulse 4s ease-in-out infinite}
+    .hexagon:nth-child(odd){border-color:var(--cyan)}
+    @keyframes hexPulse{0%,100%{opacity:0.5;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
+    
+    /* GRADIENT MESH BLOBS */
+    .bg-blob{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;opacity:0.06;animation:blobMorph 20s ease-in-out infinite}
+    .bg-blob-1{width:400px;height:400px;background:radial-gradient(circle,var(--green),transparent 70%);top:130vh;left:-100px}
+    .bg-blob-2{width:350px;height:350px;background:radial-gradient(circle,var(--cyan),transparent 70%);top:230vh;right:-80px;animation-delay:5s}
+    .bg-blob-3{width:500px;height:500px;background:radial-gradient(circle,var(--green),transparent 70%);top:360vh;left:-150px;animation-delay:10s}
+    .bg-blob-4{width:300px;height:300px;background:radial-gradient(circle,var(--cyan),transparent 70%);top:450vh;right:-50px;animation-delay:15s}
+    .bg-blob-5{width:450px;height:450px;background:radial-gradient(circle,rgba(255,215,0,0.5),transparent 70%);top:550vh;left:50%;transform:translateX(-50%);opacity:0.03}
+    @keyframes blobMorph{0%,100%{transform:scale(1) translate(0,0);border-radius:50%}25%{transform:scale(1.1) translate(20px,-20px);border-radius:40% 60% 50% 50%}50%{transform:scale(0.9) translate(-10px,30px);border-radius:60% 40% 60% 40%}75%{transform:scale(1.05) translate(15px,10px);border-radius:50% 50% 40% 60%}}
+    
+    /* DATA NODES WITH CONNECTIONS */
+    .bg-nodes{position:absolute;width:100%;height:500px;pointer-events:none;opacity:0.05}
+    .bg-nodes-1{top:250vh}
+    .bg-nodes-2{top:500vh}
+    .data-node{position:absolute;width:10px;height:10px;background:var(--green);border-radius:50%;animation:nodePulse 3s ease-in-out infinite}
+    .data-node::before{content:'';position:absolute;top:50%;left:50%;width:150px;height:1px;background:linear-gradient(90deg,var(--green),transparent);transform-origin:left center}
+    .data-node:nth-child(odd){background:var(--cyan)}
+    .data-node:nth-child(odd)::before{background:linear-gradient(90deg,var(--cyan),transparent)}
+    @keyframes nodePulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(0,255,136,0.4)}50%{transform:scale(1.5);box-shadow:0 0 20px 5px rgba(0,255,136,0.2)}}
+    
+    /* TRADING CHART BARS */
+    .bg-chart-pattern{position:absolute;width:100%;height:300px;pointer-events:none;opacity:0.04;overflow:hidden}
+    .bg-chart-pattern-1{top:200vh}
+    .bg-chart-pattern-2{top:420vh}
+    .chart-bar{position:absolute;bottom:0;width:8px;background:var(--green);border-radius:2px 2px 0 0;animation:chartBarGrow 3s ease-in-out infinite}
+    .chart-bar:nth-child(odd){background:var(--cyan)}
+    @keyframes chartBarGrow{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.2)}}
+    
+    /* CROSSHAIR TARGETS */
+    .bg-crosshair{position:absolute;width:80px;height:80px;pointer-events:none;opacity:0.04}
+    .bg-crosshair::before,.bg-crosshair::after{content:'';position:absolute;background:var(--green)}
+    .bg-crosshair::before{width:100%;height:1px;top:50%;left:0}
+    .bg-crosshair::after{width:1px;height:100%;left:50%;top:0}
+    .crosshair-circle{position:absolute;inset:10px;border:1px solid var(--green);border-radius:50%;animation:crosshairPulse 2s ease-in-out infinite}
+    .bg-crosshair-1{top:190vh;left:15%;animation:crosshairFloat 10s ease-in-out infinite}
+    .bg-crosshair-2{top:290vh;right:20%;animation:crosshairFloat 12s ease-in-out infinite reverse}
+    .bg-crosshair-3{top:410vh;left:25%;animation:crosshairFloat 8s ease-in-out infinite}
+    .bg-crosshair-4{top:530vh;right:15%;animation:crosshairFloat 14s ease-in-out infinite reverse}
+    @keyframes crosshairPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:0.5}}
+    @keyframes crosshairFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-20px)}}
+    
+    /* PERCENTAGE INDICATORS */
+    .bg-percent{position:absolute;font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;opacity:0.04;pointer-events:none;animation:percentFade 4s ease-in-out infinite}
+    .bg-percent.positive{color:var(--green)}
+    .bg-percent.negative{color:#ff4444}
+    .bg-percent-1{top:175vh;left:8%}
+    .bg-percent-2{top:245vh;right:12%;animation-delay:1s}
+    .bg-percent-3{top:335vh;left:5%;animation-delay:2s}
+    .bg-percent-4{top:425vh;right:8%;animation-delay:3s}
+    .bg-percent-5{top:505vh;left:15%;animation-delay:1.5s}
+    .bg-percent-6{top:565vh;right:18%;animation-delay:2.5s}
+    @keyframes percentFade{0%,100%{opacity:0.02;transform:translateY(0)}50%{opacity:0.06;transform:translateY(-10px)}}
+    
+    /* BINARY CODE STREAMS */
+    .bg-binary{position:absolute;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--green);opacity:0.03;pointer-events:none;white-space:nowrap;overflow:hidden;width:100%}
+    .bg-binary-1{top:160vh;animation:binaryScroll 40s linear infinite}
+    .bg-binary-2{top:320vh;animation:binaryScroll 35s linear infinite reverse}
+    .bg-binary-3{top:480vh;animation:binaryScroll 45s linear infinite}
+    @keyframes binaryScroll{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+    
+    /* WAVE SVG PATTERNS */
+    .bg-wave{position:absolute;width:100%;height:150px;pointer-events:none;opacity:0.04;overflow:hidden}
+    .bg-wave-1{top:140vh}
+    .bg-wave-2{top:340vh}
+    .bg-wave-3{top:520vh}
+    
+    /* ARROW INDICATORS */
+    .bg-arrows{position:absolute;width:100%;height:200px;pointer-events:none;opacity:0.04}
+    .bg-arrows-1{top:210vh}
+    .bg-arrows-2{top:440vh}
+    .arrow-up,.arrow-down{position:absolute;width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent}
+    .arrow-up{border-bottom:20px solid var(--green);animation:arrowFloat 2s ease-in-out infinite}
+    .arrow-down{border-top:20px solid #ff4444;animation:arrowFloat 2s ease-in-out infinite reverse}
+    @keyframes arrowFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+    
+    /* CANDLESTICK WICKS */
+    .bg-candles{position:absolute;width:100%;height:250px;pointer-events:none;opacity:0.04;display:flex;align-items:flex-end;justify-content:space-around;padding:0 5%}
+    .bg-candles-1{top:260vh}
+    .bg-candles-2{top:470vh}
+    .wick{width:2px;background:linear-gradient(180deg,var(--green) 0%,var(--cyan) 50%,var(--green) 100%);animation:wickPulse 3s ease-in-out infinite}
+    @keyframes wickPulse{0%,100%{transform:scaleY(1);opacity:0.8}50%{transform:scaleY(1.3);opacity:1}}
+    
+    /* DOLLAR SIGNS */
+    .bg-dollars{position:absolute;width:100%;height:100%;pointer-events:none}
+    .dollar{position:absolute;font-size:48px;color:var(--green);opacity:0.03;animation:dollarDrift 20s ease-in-out infinite}
+    .dollar:nth-child(odd){color:var(--cyan)}
+    @keyframes dollarDrift{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-40px) rotate(15deg)}}
+    
+    /* TRADING ICONS */
+    .bg-icons{position:absolute;width:100%;height:100%;pointer-events:none}
+    .trade-icon{position:absolute;font-size:36px;opacity:0.03;animation:iconSpin 25s linear infinite}
+    @keyframes iconSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    
+    /* PULSE RINGS */
+    .bg-pulse-ring{position:absolute;width:200px;height:200px;border:2px solid var(--green);border-radius:50%;opacity:0;pointer-events:none;animation:pulseRingExpand 4s ease-out infinite}
+    .bg-pulse-ring-1{top:170vh;left:20%}
+    .bg-pulse-ring-2{top:300vh;right:25%;animation-delay:1s}
+    .bg-pulse-ring-3{top:430vh;left:15%;animation-delay:2s}
+    .bg-pulse-ring-4{top:540vh;right:20%;animation-delay:3s}
+    @keyframes pulseRingExpand{0%{transform:scale(0.5);opacity:0.3}100%{transform:scale(2);opacity:0}}
+    
+    /* GRID OVERLAY SECTIONS */
+    .bg-grid-section{position:absolute;width:100%;height:400px;pointer-events:none;opacity:0.02;background-image:linear-gradient(var(--green) 1px,transparent 1px),linear-gradient(90deg,var(--green) 1px,transparent 1px);background-size:50px 50px}
+    .bg-grid-section-1{top:180vh}
+    .bg-grid-section-2{top:400vh}
+    
+    /* DECORATIVE LINE CONNECTORS */
+    .bg-connector{position:absolute;height:2px;pointer-events:none;opacity:0.04}
+    .bg-connector-1{top:195vh;left:10%;width:30%;background:linear-gradient(90deg,transparent,var(--green),var(--cyan),transparent);animation:connectorGlow 3s ease-in-out infinite}
+    .bg-connector-2{top:365vh;right:10%;width:40%;background:linear-gradient(90deg,transparent,var(--cyan),var(--green),transparent);animation:connectorGlow 4s ease-in-out infinite reverse}
+    .bg-connector-3{top:495vh;left:15%;width:35%;background:linear-gradient(90deg,transparent,var(--green),var(--cyan),transparent);animation:connectorGlow 3.5s ease-in-out infinite}
+    @keyframes connectorGlow{0%,100%{opacity:0.02}50%{opacity:0.08}}
+    
+    /* BACKGROUND GRAPHICS CONTAINER */
+    .bg-graphics-container{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+    
+    /* WAVE SVG STYLES */
+    .bg-wave svg{width:100%;height:100%}
+    .wave-path{fill:none;stroke:var(--green);stroke-width:2;animation:waveDraw 8s ease-in-out infinite}
+    .wave-path-2{stroke:var(--cyan);animation-delay:4s}
+    @keyframes waveDraw{0%,100%{stroke-dashoffset:1000;opacity:0.3}50%{stroke-dashoffset:0;opacity:1}}
+    
+    /* DIAMONDS */
+    .bg-diamond{position:absolute;width:40px;height:40px;border:1px solid var(--green);transform:rotate(45deg);pointer-events:none;opacity:0.04;animation:diamondSpin 15s linear infinite}
+    .bg-diamond-1{top:165vh;left:20%}
+    .bg-diamond-2{top:275vh;right:18%;border-color:var(--cyan)}
+    .bg-diamond-3{top:385vh;left:12%}
+    .bg-diamond-4{top:495vh;right:22%;border-color:var(--cyan)}
+    @keyframes diamondSpin{0%{transform:rotate(45deg) scale(1)}50%{transform:rotate(225deg) scale(1.2)}100%{transform:rotate(405deg) scale(1)}}
+    
+    /* TRIANGLES */
+    .bg-triangle{position:absolute;width:0;height:0;border-left:25px solid transparent;border-right:25px solid transparent;border-bottom:40px solid var(--green);pointer-events:none;opacity:0.03;animation:triangleFloat 12s ease-in-out infinite}
+    .bg-triangle-1{top:185vh;left:8%}
+    .bg-triangle-2{top:255vh;right:10%;border-bottom-color:var(--cyan)}
+    .bg-triangle-3{top:345vh;left:15%}
+    .bg-triangle-4{top:435vh;right:12%;border-bottom-color:var(--cyan)}
+    .bg-triangle-5{top:515vh;left:6%}
+    @keyframes triangleFloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-30px) rotate(10deg)}}
+    
+    /* DOTTED CIRCLES */
+    .bg-dotted-circle{position:absolute;border:2px dashed var(--green);border-radius:50%;pointer-events:none;opacity:0.03;animation:dottedRotate 30s linear infinite}
+    .bg-dotted-circle-1{width:150px;height:150px;top:195vh;right:15%}
+    .bg-dotted-circle-2{width:200px;height:200px;top:325vh;left:10%;border-color:var(--cyan);animation-direction:reverse}
+    .bg-dotted-circle-3{width:120px;height:120px;top:455vh;right:20%}
+    .bg-dotted-circle-4{width:180px;height:180px;top:565vh;left:8%;border-color:var(--cyan);animation-direction:reverse}
+    @keyframes dottedRotate{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    
+    /* STOCK TICKER */
+    .bg-ticker{position:absolute;width:100%;height:30px;pointer-events:none;opacity:0.04;overflow:hidden;display:flex;align-items:center}
+    .bg-ticker-1{top:205vh}
+    .bg-ticker-2{top:375vh}
+    .bg-ticker-3{top:525vh}
+    .ticker-content{display:flex;gap:40px;animation:tickerScroll 30s linear infinite;white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:12px}
+    .ticker-item{display:flex;align-items:center;gap:8px}
+    .ticker-item.up{color:var(--green)}
+    .ticker-item.down{color:#ff4444}
+    @keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+    
+    /* PRICE LEVELS */
+    .bg-price-level{position:absolute;width:100%;height:1px;pointer-events:none;display:flex;align-items:center}
+    .bg-price-level::before{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent);opacity:0.05}
+    .bg-price-level::after{content:attr(data-price);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--green);opacity:0.06;margin-left:10px;padding-right:20px}
+    .bg-price-level-1{top:225vh}
+    .bg-price-level-2{top:295vh}
+    .bg-price-level-3{top:385vh}
+    .bg-price-level-4{top:465vh}
+    .bg-price-level-5{top:535vh}
+    
+    /* SPARKLE STARS */
+    .bg-sparkle{position:absolute;width:4px;height:4px;background:var(--green);pointer-events:none;animation:sparkleTwinkle 2s ease-in-out infinite}
+    .bg-sparkle::before,.bg-sparkle::after{content:'';position:absolute;background:inherit}
+    .bg-sparkle::before{width:12px;height:2px;top:1px;left:-4px}
+    .bg-sparkle::after{width:2px;height:12px;top:-4px;left:1px}
+    @keyframes sparkleTwinkle{0%,100%{opacity:0.02;transform:scale(0.8)}50%{opacity:0.08;transform:scale(1.2)}}
+    
+    /* ORBIT RINGS */
+    .bg-orbit{position:absolute;border:1px solid var(--green);border-radius:50%;pointer-events:none;opacity:0.03}
+    .bg-orbit::after{content:'';position:absolute;width:8px;height:8px;background:var(--green);border-radius:50%;top:-4px;left:50%;animation:orbitMove 8s linear infinite}
+    .bg-orbit-1{width:200px;height:200px;top:235vh;left:5%}
+    .bg-orbit-2{width:150px;height:150px;top:365vh;right:8%;border-color:var(--cyan)}
+    .bg-orbit-2::after{background:var(--cyan);animation-duration:6s;animation-direction:reverse}
+    .bg-orbit-3{width:180px;height:180px;top:485vh;left:10%}
+    .bg-orbit-3::after{animation-duration:10s}
+    @keyframes orbitMove{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    
+    /* CURRENCY PAIRS */
+    .bg-currency{position:absolute;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;opacity:0.03;pointer-events:none;animation:currencyPulse 5s ease-in-out infinite}
+    .bg-currency-1{top:188vh;right:25%;color:var(--green)}
+    .bg-currency-2{top:268vh;left:18%;color:var(--cyan);animation-delay:1s}
+    .bg-currency-3{top:358vh;right:20%;color:var(--green);animation-delay:2s}
+    .bg-currency-4{top:448vh;left:22%;color:var(--cyan);animation-delay:3s}
+    .bg-currency-5{top:528vh;right:18%;color:var(--green);animation-delay:4s}
+    @keyframes currencyPulse{0%,100%{opacity:0.02;transform:scale(1)}50%{opacity:0.05;transform:scale(1.1)}}
+    
+    /* RISING BARS ANIMATION */
+    .bg-rising-bars{position:absolute;width:100%;height:200px;pointer-events:none;opacity:0.03;display:flex;align-items:flex-end;justify-content:center;gap:15px}
+    .bg-rising-bars-1{top:310vh}
+    .bg-rising-bars-2{top:550vh}
+    .rising-bar{width:6px;background:linear-gradient(180deg,var(--green),var(--cyan));border-radius:3px;animation:risingBar 2s ease-in-out infinite}
+    @keyframes risingBar{0%,100%{height:20px}50%{height:120px}}
+    
+    /* NETWORK MESH */
+    .bg-mesh{position:absolute;width:400px;height:400px;pointer-events:none;opacity:0.02}
+    .bg-mesh-1{top:220vh;left:-50px}
+    .bg-mesh-2{top:400vh;right:-50px}
+    .mesh-line{position:absolute;height:1px;background:var(--green);transform-origin:left center}
+    
+    /* FLOATING NUMBERS */
+    .bg-float-num{position:absolute;font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;opacity:0.03;pointer-events:none;animation:floatNum 10s ease-in-out infinite}
+    .bg-float-num-1{top:175vh;left:92%;color:var(--green)}
+    .bg-float-num-2{top:248vh;left:3%;color:var(--cyan);animation-delay:2s}
+    .bg-float-num-3{top:338vh;left:95%;color:var(--green);animation-delay:4s}
+    .bg-float-num-4{top:418vh;left:2%;color:var(--cyan);animation-delay:6s}
+    .bg-float-num-5{top:508vh;left:93%;color:var(--green);animation-delay:8s}
+    @keyframes floatNum{0%,100%{transform:translateY(0);opacity:0.02}50%{transform:translateY(-20px);opacity:0.05}}
+    
+    /* GLITCH LINES */
+    .bg-glitch{position:absolute;width:100%;height:2px;background:var(--green);pointer-events:none;opacity:0;animation:glitchLine 8s linear infinite}
+    .bg-glitch-1{top:190vh}
+    .bg-glitch-2{top:330vh;animation-delay:2s}
+    .bg-glitch-3{top:470vh;animation-delay:4s}
+    @keyframes glitchLine{0%,94%,100%{opacity:0;transform:scaleX(0)}95%{opacity:0.1;transform:scaleX(1)}96%{opacity:0;transform:scaleX(0.5)}97%{opacity:0.15;transform:scaleX(0.8)}98%{opacity:0;transform:scaleX(0)}}
+    
+    /* PIE CHART GRAPHICS */
+    .bg-pie{position:absolute;width:120px;height:120px;border-radius:50%;pointer-events:none;opacity:0.04;animation:pieRotate 20s linear infinite}
+    .bg-pie::before{content:'';position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--green) 0deg 120deg,var(--cyan) 120deg 200deg,transparent 200deg 360deg)}
+    .bg-pie::after{content:'';position:absolute;inset:30px;background:var(--bg);border-radius:50%}
+    .bg-pie-1{top:240vh;left:8%}
+    .bg-pie-2{top:380vh;right:10%;animation-direction:reverse}
+    .bg-pie-3{top:510vh;left:5%}
+    @keyframes pieRotate{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    
+    /* LINE GRAPH PATHS */
+    .bg-line-graph{position:absolute;width:300px;height:150px;pointer-events:none;opacity:0.04}
+    .bg-line-graph svg{width:100%;height:100%}
+    .bg-line-graph-1{top:260vh;right:5%}
+    .bg-line-graph-2{top:430vh;left:3%}
+    .graph-line{fill:none;stroke:var(--green);stroke-width:2;stroke-linecap:round;animation:graphDraw 5s ease-in-out infinite}
+    .graph-line-2{stroke:var(--cyan);animation-delay:2.5s}
+    @keyframes graphDraw{0%,100%{stroke-dashoffset:500;opacity:0.3}50%{stroke-dashoffset:0;opacity:1}}
+    
+    /* RADAR CHART */
+    .bg-radar{position:absolute;width:150px;height:150px;pointer-events:none;opacity:0.03}
+    .bg-radar-1{top:290vh;left:12%}
+    .bg-radar-2{top:460vh;right:15%}
+    .radar-ring{position:absolute;border:1px solid var(--green);border-radius:50%;animation:radarPing 3s ease-out infinite}
+    .radar-ring-1{inset:0}
+    .radar-ring-2{inset:25px;animation-delay:0.5s}
+    .radar-ring-3{inset:50px;animation-delay:1s}
+    .radar-sweep{position:absolute;top:50%;left:50%;width:50%;height:2px;background:linear-gradient(90deg,var(--green),transparent);transform-origin:left center;animation:radarSweep 4s linear infinite}
+    @keyframes radarPing{0%{opacity:0.8}100%{opacity:0}}
+    @keyframes radarSweep{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    
+    /* ASCENDING STAIRS PATTERN */
+    .bg-stairs{position:absolute;width:200px;height:150px;pointer-events:none;opacity:0.03}
+    .bg-stairs-1{top:320vh;right:8%}
+    .bg-stairs-2{top:490vh;left:6%}
+    .stair-step{position:absolute;background:var(--green);animation:stairGlow 2s ease-in-out infinite}
+    .stair-step:nth-child(odd){background:var(--cyan)}
+    
+    /* HEARTBEAT LINE */
+    .bg-heartbeat{position:absolute;width:100%;height:60px;pointer-events:none;opacity:0.04;overflow:hidden}
+    .bg-heartbeat-1{top:350vh}
+    .bg-heartbeat-2{top:540vh}
+    .heartbeat-line{position:absolute;top:50%;left:0;width:200%;height:2px;background:repeating-linear-gradient(90deg,var(--green) 0px,var(--green) 50px,transparent 50px,transparent 70px,var(--green) 70px,var(--green) 75px,transparent 75px,transparent 80px,var(--green) 80px,var(--green) 90px,transparent 90px,transparent 100px,var(--green) 100px,var(--green) 180px,transparent 180px,transparent 200px);animation:heartbeatScroll 4s linear infinite}
+    @keyframes heartbeatScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+    
+    /* LOADING CIRCLES */
+    .bg-loading{position:absolute;width:60px;height:60px;pointer-events:none;opacity:0.04}
+    .bg-loading-1{top:280vh;right:25%}
+    .bg-loading-2{top:420vh;left:20%}
+    .bg-loading-3{top:560vh;right:22%}
+    .loading-arc{position:absolute;inset:0;border:3px solid transparent;border-top-color:var(--green);border-radius:50%;animation:loadingSpin 1.5s linear infinite}
+    .loading-arc-2{inset:8px;border-top-color:var(--cyan);animation-duration:2s;animation-direction:reverse}
+    @keyframes loadingSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    
+    /* BRACKET PATTERNS */
+    .bg-bracket{position:absolute;font-size:80px;font-weight:100;color:var(--green);opacity:0.03;pointer-events:none;font-family:monospace;animation:bracketPulse 4s ease-in-out infinite}
+    .bg-bracket-1{top:265vh;left:3%}
+    .bg-bracket-2{top:395vh;right:2%}
+    .bg-bracket-3{top:525vh;left:4%}
+    @keyframes bracketPulse{0%,100%{opacity:0.02;transform:scale(1)}50%{opacity:0.05;transform:scale(1.1)}}
+    
+    /* VOLUME METER */
+    .bg-volume-meter{position:absolute;width:30px;height:200px;pointer-events:none;opacity:0.04;display:flex;flex-direction:column-reverse;gap:4px}
+    .bg-volume-meter-1{top:300vh;left:2%}
+    .bg-volume-meter-2{top:450vh;right:3%}
+    .meter-bar{width:100%;background:var(--green);border-radius:2px;animation:meterPulse 1s ease-in-out infinite}
+    .meter-bar:nth-child(odd){background:var(--cyan)}
+    @keyframes meterPulse{0%,100%{opacity:0.5}50%{opacity:1}}
+    
+    /* INFINITY SYMBOL */
+    .bg-infinity{position:absolute;font-size:100px;color:var(--green);opacity:0.03;pointer-events:none;animation:infinityFloat 8s ease-in-out infinite}
+    .bg-infinity-1{top:335vh;right:12%}
+    .bg-infinity-2{top:505vh;left:10%}
+    @keyframes infinityFloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-20px) rotate(10deg)}}
+    
+    /* HASH PATTERNS */
+    .bg-hash{position:absolute;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--green);opacity:0.02;pointer-events:none;white-space:pre;line-height:1.5}
+    .bg-hash-1{top:285vh;right:0}
+    .bg-hash-2{top:475vh;left:0}
+
+    .nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 40px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:all 0.3s;animation:navSlideDown 0.6s ease-out}
+    @keyframes navSlideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+    .nav-logo{font-size:24px;font-weight:800;color:var(--green);text-decoration:none;letter-spacing:-1px;position:relative;transition:all 0.3s}
+    .nav-logo::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:2px;background:var(--green);transition:width 0.3s}
+    .nav-logo:hover::after{width:100%}
+    .nav-logo:hover{text-shadow:0 0 20px var(--green-glow)}
+    .nav-links{display:flex;gap:32px;align-items:center}
+    .nav-link{color:var(--text-dim);text-decoration:none;font-size:14px;font-weight:500;transition:all 0.3s;position:relative}
+    .nav-link::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--green);transition:width 0.3s}
+    .nav-link:hover{color:var(--green)}
+    .nav-link:hover::after{width:100%}
+    .nav-cta{padding:12px 24px;background:var(--green);color:#000;font-weight:700;font-size:14px;border-radius:8px;text-decoration:none;transition:all 0.3s;position:relative;overflow:hidden}
+    .nav-cta::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);transition:left 0.5s}
+    .nav-cta:hover::before{left:100%}
+    .nav-cta:hover{box-shadow:0 0 30px var(--green-glow);transform:translateY(-2px)}
+    .mobile-menu{display:none;flex-direction:column;gap:4px;cursor:pointer}
+    .mobile-menu span{width:24px;height:2px;background:var(--text);transition:all 0.3s}
+    .mobile-menu:hover span{background:var(--green)}
+    
+    /* CONTAINER */
+    .container{max-width:1200px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+    .section{padding:100px 0;position:relative;z-index:1}
+    
+    /* SECTION HEADERS */
+    .section-header{text-align:center;margin-bottom:60px}
+    .section-tag{display:inline-block;padding:8px 20px;background:var(--green-dim);border:1px solid var(--border-green);border-radius:999px;font-size:12px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:20px;animation:tagPop 0.6s ease-out,tagGlow 3s ease-in-out infinite 1s;position:relative;overflow:hidden}
+    .section-tag::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);animation:tagShimmer 4s ease-in-out infinite}
+    @keyframes tagShimmer{0%,100%{transform:translateX(-100%)}50%{transform:translateX(100%)}}
+    @keyframes tagPop{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
+    @keyframes tagGlow{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 20px rgba(0,255,136,0.3)}}
+    .section-title{font-size:clamp(32px,5vw,52px);font-weight:800;margin-bottom:16px;letter-spacing:-1px;animation:fadeInUp 0.6s ease-out 0.1s both}
+    .section-subtitle{font-size:18px;color:var(--text-dim);max-width:700px;margin:0 auto;animation:fadeInUp 0.6s ease-out 0.2s both}
+    
+    /* HERO */
+    .hero{padding:160px 0 100px;text-align:center;position:relative;overflow:hidden;z-index:1}
+    .hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:150%;height:600px;background:radial-gradient(ellipse at center,rgba(0,255,136,0.08) 0%,transparent 60%);pointer-events:none;animation:heroPulse 4s ease-in-out infinite}
+    @keyframes heroPulse{0%,100%{opacity:0.5;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.1)}}
+    
+    .hero-attention{display:inline-block;padding:12px 28px;background:var(--green-dim);border:1px solid var(--border-green);border-radius:999px;font-size:14px;font-weight:600;color:var(--green);margin-bottom:32px;letter-spacing:0.5px;animation:fadeInDown 0.8s ease-out,badgePulse 2s ease-in-out infinite 1s;position:relative;overflow:hidden}
+    .hero-attention::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);animation:shimmerBadge 3s ease-in-out infinite}
+    @keyframes shimmerBadge{0%{left:-100%}50%,100%{left:100%}}
+    @keyframes badgePulse{0%,100%{box-shadow:0 0 0 0 rgba(0,255,136,0.4)}50%{box-shadow:0 0 20px 5px rgba(0,255,136,0.2)}}
+    @keyframes fadeInDown{from{opacity:0;transform:translateY(-30px)}to{opacity:1;transform:translateY(0)}}
+    
+    .hero-title{font-size:clamp(36px,6vw,72px);font-weight:800;line-height:1.1;margin-bottom:24px;letter-spacing:-2px;animation:fadeInUp 0.8s ease-out 0.2s both}
+    .hero-title .highlight{background:linear-gradient(90deg,var(--gold),#ffaa00,var(--gold));background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:goldShimmer 3s ease-in-out infinite}
+    @keyframes goldShimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    .hero-title .green{color:var(--green);animation:textGlow 2s ease-in-out infinite}
+    @keyframes textGlow{0%,100%{text-shadow:0 0 10px rgba(0,255,136,0.3)}50%{text-shadow:0 0 30px rgba(0,255,136,0.6),0 0 60px rgba(0,255,136,0.3)}}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    
+    .hero-subtitle{font-size:clamp(16px,2vw,22px);color:var(--text-dim);max-width:800px;margin:0 auto 40px;font-style:italic;line-height:1.7;animation:fadeInUp 0.8s ease-out 0.4s both}
+    .hero-subtitle::after{content:'|';color:var(--green);animation:cursorBlink 1s step-end infinite;margin-left:2px}
+    @keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
+    
+    .hero-cta{display:inline-flex;align-items:center;gap:12px;padding:20px 48px;background:linear-gradient(135deg,var(--green),#00cc6a);color:#000;font-size:18px;font-weight:700;border-radius:12px;text-decoration:none;box-shadow:0 10px 40px var(--green-glow);transition:all 0.3s;animation:fadeInUp 0.8s ease-out 0.6s both,ctaPulse 2s ease-in-out infinite 1.5s;position:relative;overflow:hidden}
+    .hero-cta::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);animation:ctaShimmer 2s ease-in-out infinite}
+    @keyframes ctaShimmer{0%{left:-100%}50%,100%{left:100%}}
+    @keyframes ctaPulse{0%,100%{box-shadow:0 10px 40px var(--green-glow)}50%{box-shadow:0 15px 60px rgba(0,255,136,0.5),0 0 80px rgba(0,255,136,0.2)}}
+    .hero-cta:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 20px 60px var(--green-glow)}
+    .hero-cta svg{width:20px;height:20px;animation:arrowBounce 1s ease-in-out infinite}
+    @keyframes arrowBounce{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+    .hero-image{margin-top:60px;position:relative;animation:fadeInUp 0.8s ease-out 0.8s both}
+    .hero-image img{max-width:100%;border-radius:20px;border:1px solid var(--border)}
+    
+    /* SCROLL INDICATOR */
+    .scroll-indicator{
+      margin-top:60px;
+      display:flex;flex-direction:column;align-items:center;gap:8px;
+      animation:fadeInUp 0.8s ease-out 1s both;
+    }
+    .scroll-indicator span{font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:2px}
+    .scroll-arrow{
+      width:30px;height:50px;
+      border:2px solid var(--border-green);
+      border-radius:15px;
+      display:flex;align-items:flex-start;justify-content:center;
+      padding-top:8px;
+      position:relative;
+    }
+    .scroll-arrow::before{
+      content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);
+      width:4px;height:8px;background:var(--green);border-radius:2px;
+      animation:scrollDot 2s ease-in-out infinite;
+    }
+    @keyframes scrollDot{0%,100%{top:8px;opacity:1}50%{top:28px;opacity:0.3}}
+    .scroll-arrow svg{width:16px;height:16px;fill:var(--green);animation:scrollArrow 2s ease-in-out infinite}
+    @keyframes scrollArrow{0%,100%{transform:translateY(0);opacity:0.5}50%{transform:translateY(8px);opacity:1}}
+    
+    /* STATS BAR */
+    .stats-bar{background:linear-gradient(90deg,var(--bg-card),var(--bg-light),var(--bg-card));border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:40px 0;position:relative;z-index:1;overflow:hidden}
+    .stats-bar::before{content:'';position:absolute;top:0;left:-100%;width:200%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,255,136,0.03),transparent);animation:statsShimmer 8s linear infinite}
+    @keyframes statsShimmer{0%{transform:translateX(0)}100%{transform:translateX(50%)}}
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;text-align:center}
+    .stat-item{animation:fadeInUp 0.6s ease-out both;position:relative}
+    .stat-item:nth-child(1){animation-delay:0.1s}
+    .stat-item:nth-child(2){animation-delay:0.2s}
+    .stat-item:nth-child(3){animation-delay:0.3s}
+    .stat-item:nth-child(4){animation-delay:0.4s}
+    .stat-item::after{content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);width:40px;height:3px;background:var(--green);border-radius:2px;opacity:0;animation:statLine 0.6s ease-out 0.8s forwards}
+    @keyframes statLine{to{opacity:1}}
+    .stat-item .stat-value{font-size:clamp(32px,5vw,56px);font-weight:800;background:linear-gradient(135deg,var(--green),var(--cyan),var(--green));background-size:200% 200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1;animation:gradientMove 4s ease-in-out infinite}
+    @keyframes gradientMove{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+    .stat-item .stat-label{font-size:14px;color:var(--text-dim);margin-top:8px;font-weight:500}
+    
+    /* VIDEO SECTION */
+    .video-section{background:linear-gradient(180deg,var(--bg) 0%,var(--bg-card) 100%);position:relative;z-index:1}
+    .video-container{max-width:900px;margin:0 auto;animation:fadeInUp 0.8s ease-out}
+    .video-card{position:relative;border-radius:20px;overflow:hidden;border:2px solid transparent;background:linear-gradient(var(--bg-card),var(--bg-card)) padding-box,linear-gradient(135deg,var(--green),var(--cyan),var(--green)) border-box;background-size:100% 100%,200% 200%;box-shadow:0 30px 80px rgba(0,255,136,0.1);cursor:pointer;transition:all 0.4s;animation:borderGlow 4s ease-in-out infinite}
+    @keyframes borderGlow{0%,100%{background-size:100% 100%,200% 200%;background-position:0 0,0% 50%}50%{background-size:100% 100%,200% 200%;background-position:0 0,100% 50%}}
+    .video-card::before{content:'';position:absolute;inset:-2px;border-radius:22px;background:linear-gradient(135deg,var(--green),transparent,var(--cyan),transparent,var(--green));background-size:400% 400%;z-index:-1;animation:rotateBorder 6s linear infinite;opacity:0.5}
+    @keyframes rotateBorder{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    .video-card:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 40px 100px rgba(0,255,136,0.25)}
+    .video-thumb{aspect-ratio:16/9;background:linear-gradient(135deg,#0a1a20,#051015);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+    .video-thumb::before{content:'';position:absolute;inset:0;background:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="g" patternUnits="userSpaceOnUse" width="20" height="20"><circle cx="2" cy="2" r="1" fill="rgba(0,255,136,0.05)"/></pattern></defs><rect fill="url(%23g)" width="100" height="100"/></svg>');animation:patternMove 20s linear infinite}
+    @keyframes patternMove{0%{transform:translate(0,0)}100%{transform:translate(40px,40px)}}
+    .video-thumb::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,transparent 0%,rgba(0,0,0,0.4) 100%)}
+    .video-content{position:relative;z-index:1;text-align:center;padding:40px}
+    .video-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,0,0,0.2);border:1px solid rgba(255,0,0,0.4);border-radius:8px;font-size:12px;font-weight:700;color:#ff4444;text-transform:uppercase;letter-spacing:1px;margin-bottom:20px;animation:badgeBlink 2s ease-in-out infinite}
+    .live-dot{width:8px;height:8px;background:#ff4444;border-radius:50%;animation:livePulse 1.5s ease-in-out infinite;box-shadow:0 0 10px #ff4444}
+    @keyframes livePulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:0.7}}
+    @keyframes badgeBlink{0%,100%{opacity:1}50%{opacity:0.7}}
+    .video-title{font-size:clamp(24px,4vw,42px);font-weight:800;background:linear-gradient(90deg,#fff,var(--green),#fff);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:24px;animation:titleShine 3s ease-in-out infinite}
+    @keyframes titleShine{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+    .play-btn{width:80px;height:80px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;box-shadow:0 10px 40px var(--green-glow);transition:all 0.3s;animation:playPulse 2s ease-in-out infinite;position:relative}
+    .play-btn::before{content:'';position:absolute;inset:-8px;border-radius:50%;border:2px solid var(--green);opacity:0;animation:playRipple 2s ease-out infinite}
+    .play-btn::after{content:'';position:absolute;inset:-16px;border-radius:50%;border:2px solid var(--green);opacity:0;animation:playRipple 2s ease-out infinite 0.5s}
+    @keyframes playPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+    @keyframes playRipple{0%{transform:scale(0.8);opacity:0.8}100%{transform:scale(1.4);opacity:0}}
+    .video-card:hover .play-btn{transform:scale(1.15)}
+    .play-btn svg{width:32px;height:32px;fill:#000;margin-left:4px}
+    
+    /* HOW IT WORKS */
+    .how-section{background:var(--bg)}
+    .section-header{text-align:center;margin-bottom:60px}
+    .section-tag{display:inline-block;padding:8px 20px;background:var(--green-dim);border:1px solid var(--border-green);border-radius:999px;font-size:12px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:20px;animation:tagPop 0.6s ease-out,tagGlow 3s ease-in-out infinite 1s;position:relative;overflow:hidden}
+    .section-tag::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);animation:tagShimmer 4s ease-in-out infinite}
+    @keyframes tagShimmer{0%,100%{transform:translateX(-100%)}50%{transform:translateX(100%)}}
+    @keyframes tagPop{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
+    @keyframes tagGlow{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 20px rgba(0,255,136,0.3)}}
+    .section-title{font-size:clamp(32px,5vw,52px);font-weight:800;margin-bottom:16px;letter-spacing:-1px;animation:fadeInUp 0.6s ease-out 0.1s both}
+    .section-subtitle{font-size:18px;color:var(--text-dim);max-width:700px;margin:0 auto;animation:fadeInUp 0.6s ease-out 0.2s both}
+    
+    .intro-text{max-width:900px;margin:0 auto 60px;padding:40px;background:var(--bg-card);border:1px solid var(--border);border-radius:20px;position:relative;overflow:hidden;animation:fadeInUp 0.6s ease-out}
+    .intro-text::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--green),var(--cyan),var(--green));background-size:200% 100%;animation:introLine 3s linear infinite}
+    @keyframes introLine{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+    .intro-text::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 0% 0%,rgba(0,255,136,0.05),transparent 50%);pointer-events:none}
+    .intro-text p{font-size:17px;color:var(--text-dim);line-height:1.9;margin-bottom:20px;position:relative}
+    .intro-text p:last-child{margin-bottom:0}
+    .intro-text strong{color:var(--text)}
+    .intro-text .green{color:var(--green);font-weight:700;position:relative}
+    .intro-text .green::after{content:'';position:absolute;bottom:-2px;left:0;width:100%;height:2px;background:var(--green);animation:greenUnderline 2s ease-in-out infinite}
+    @keyframes greenUnderline{0%,100%{transform:scaleX(1)}50%{transform:scaleX(0.5)}}
+    
+    /* FLOATING SYMBOLS */
+    .floating-symbols{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+    .float-symbol{position:absolute;font-size:24px;opacity:0.06;animation:symbolFloat 15s ease-in-out infinite}
+    .float-symbol:nth-child(1){top:15%;left:5%;animation-delay:0s}
+    .float-symbol:nth-child(2){top:25%;right:8%;animation-delay:2s;font-size:20px}
+    .float-symbol:nth-child(3){top:45%;left:3%;animation-delay:4s;font-size:28px}
+    .float-symbol:nth-child(4){top:65%;right:5%;animation-delay:6s}
+    .float-symbol:nth-child(5){top:80%;left:8%;animation-delay:8s;font-size:22px}
+    .float-symbol:nth-child(6){top:35%;right:3%;animation-delay:10s;font-size:26px}
+    .float-symbol:nth-child(7){top:55%;left:6%;animation-delay:12s}
+    .float-symbol:nth-child(8){top:75%;right:6%;animation-delay:14s;font-size:18px}
+    @keyframes symbolFloat{0%,100%{transform:translateY(0) rotate(0deg);opacity:0.04}25%{transform:translateY(-30px) rotate(10deg);opacity:0.08}50%{transform:translateY(-15px) rotate(-5deg);opacity:0.06}75%{transform:translateY(-40px) rotate(15deg);opacity:0.08}}
+    
+    /* STEPS HEADER */
+    .steps-header{
+      display:flex;align-items:center;justify-content:center;gap:24px;
+      margin:60px auto 32px;max-width:600px;
+      animation:fadeInUp 0.6s ease-out;
+    }
+    .steps-divider{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border-green),transparent);animation:dividerGrow 1s ease-out 0.3s both}
+    @keyframes dividerGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+    .steps-header-text{
+      font-size:14px;font-weight:700;color:var(--text-dim);
+      text-transform:uppercase;letter-spacing:2px;white-space:nowrap;
+      animation:textPulse 2s ease-in-out infinite;
+    }
+    @keyframes textPulse{0%,100%{opacity:0.7}50%{opacity:1}}
+    
+    /* STEPS - AKAPWC STYLE */
+    .steps-container{max-width:900px;margin:0 auto}
+    
+    /* MAIN STEP 1 BUTTON */
+    .step-main{
+      position:relative;
+      display:block;
+      padding:28px 40px;
+      background:linear-gradient(135deg,#00ff88 0%,#00cc6a 50%,#00aa55 100%);
+      border-radius:16px;
+      text-decoration:none;
+      text-align:center;
+      cursor:pointer;
+      transition:all 0.4s ease;
+      overflow:hidden;
+      box-shadow:0 8px 32px rgba(0,255,136,0.3),0 0 0 1px rgba(255,255,255,0.1) inset;
+      margin-bottom:24px;
+      animation:pulseGlow 2s ease-in-out infinite;
+    }
+    @keyframes pulseGlow{
+      0%,100%{box-shadow:0 8px 32px rgba(0,255,136,0.3),0 0 0 1px rgba(255,255,255,0.1) inset}
+      50%{box-shadow:0 8px 48px rgba(0,255,136,0.5),0 0 80px rgba(0,255,136,0.2),0 0 0 1px rgba(255,255,255,0.1) inset}
+    }
+    .step-main::before{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);
+      transform:translateX(-100%);
+      animation:shimmer 3s ease-in-out infinite;
+    }
+    @keyframes shimmer{0%,100%{transform:translateX(-100%)}50%{transform:translateX(100%)}}
+    .step-main:hover{
+      transform:translateY(-4px) scale(1.02);
+      box-shadow:0 16px 48px rgba(0,255,136,0.5),0 0 80px rgba(0,255,136,0.3),0 0 0 1px rgba(255,255,255,0.2) inset;
+      animation:none;
+    }
+    .step-main-label{
+      display:block;
+      font-size:13px;font-weight:800;color:rgba(0,0,0,0.6);
+      text-transform:uppercase;letter-spacing:2px;
+      margin-bottom:8px;
+    }
+    .step-main-title{
+      font-size:clamp(20px,3vw,28px);font-weight:800;color:#000;
+      text-transform:uppercase;letter-spacing:1px;
+      margin-bottom:8px;
+    }
+    .step-main-desc{
+      font-size:14px;color:rgba(0,0,0,0.7);font-weight:500;
+      text-transform:uppercase;letter-spacing:0.5px;
+    }
+    .step-main-arrow{
+      position:absolute;right:30px;top:50%;transform:translateY(-50%);
+      width:50px;height:50px;background:rgba(0,0,0,0.15);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      transition:all 0.3s;
+    }
+    .step-main-arrow svg{width:24px;height:24px;fill:#000}
+    .step-main:hover .step-main-arrow{background:rgba(0,0,0,0.25);transform:translateY(-50%) scale(1.1)}
+    
+    /* LOCKED STEPS CONTAINER */
+    .steps-locked-wrapper{position:relative;margin-top:16px}
+    .steps-locked-overlay{
+      position:absolute;inset:0;z-index:10;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
+      border-radius:16px;
+      cursor:pointer;
+      transition:all 0.3s;
+    }
+    .steps-locked-overlay:hover{background:rgba(0,0,0,0.8)}
+    .steps-locked-text{
+      padding:16px 32px;
+      background:linear-gradient(135deg,var(--green),#00cc6a);
+      border-radius:12px;
+      font-size:14px;font-weight:700;color:#000;
+      text-transform:uppercase;letter-spacing:1px;
+      box-shadow:0 8px 32px rgba(0,255,136,0.3);
+      transition:all 0.3s;
+    }
+    .steps-locked-overlay:hover .steps-locked-text{transform:scale(1.05)}
+    
+    /* LOCKED STEPS GRID */
+    .steps-locked-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:16px;
+      opacity:0.4;
+      filter:blur(1px);
+    }
+    .step-locked-card{
+      padding:24px 20px;
+      background:var(--bg-card);
+      border:1px solid var(--border);
+      border-radius:14px;
+      text-align:center;
+    }
+    .step-locked-num{
+      width:48px;height:48px;
+      background:var(--bg-light);border:1px solid var(--border);
+      border-radius:12px;
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto 16px;
+      font-size:18px;font-weight:800;color:var(--text-muted);
+    }
+    .step-locked-label{
+      font-size:10px;font-weight:700;color:var(--text-muted);
+      text-transform:uppercase;letter-spacing:1px;
+      margin-bottom:6px;
+    }
+    .step-locked-title{
+      font-size:14px;font-weight:700;color:var(--text-dim);
+      line-height:1.4;
+    }
+    
+    @media(max-width:768px){
+      .steps-locked-grid{grid-template-columns:1fr}
+      .step-main-arrow{display:none}
+    }
+    
+    /* ACTION ACCORDION BARS - AKAPWC STYLE */
+    .action-accordions{margin-top:40px;display:flex;flex-direction:column;gap:12px;max-width:900px;margin-left:auto;margin-right:auto}
+    .action-bar{
+      padding:18px 28px;
+      background:linear-gradient(135deg,#00ff88 0%,#00cc6a 100%);
+      border-radius:12px;
+      cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:12px;
+      transition:all 0.4s;
+      box-shadow:0 4px 20px rgba(0,255,136,0.2);
+      position:relative;
+      overflow:hidden;
+      animation:barSlideIn 0.5s ease-out both;
+    }
+    .action-bar:nth-child(1){animation-delay:0.1s}
+    .action-bar:nth-child(3){animation-delay:0.2s}
+    .action-bar:nth-child(5){animation-delay:0.3s}
+    .action-bar:nth-child(7){animation-delay:0.4s}
+    @keyframes barSlideIn{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+    .action-bar::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);transition:left 0.6s}
+    .action-bar:hover::before{left:100%}
+    .action-bar:hover{
+      transform:translateY(-3px) scale(1.01);
+      box-shadow:0 8px 35px rgba(0,255,136,0.35);
+    }
+    .action-bar-text{
+      font-size:14px;font-weight:700;color:#000;
+      text-transform:uppercase;letter-spacing:1px;
+    }
+    .action-bar-icon{
+      font-size:16px;color:#000;transition:transform 0.4s;
+    }
+    .action-bar.open .action-bar-icon{transform:rotate(180deg)}
+    .action-bar-content{
+      max-height:0;overflow:hidden;
+      background:var(--bg-card);
+      border-radius:0 0 12px 12px;
+      margin-top:-8px;
+      transition:max-height 0.5s cubic-bezier(0.4,0,0.2,1),padding 0.4s ease;
+    }
+    .action-bar-content.open{
+      max-height:300px;
+      padding:24px;
+      border:1px solid var(--border);
+      border-top:none;
+      animation:contentFadeIn 0.4s ease-out;
+    }
+    @keyframes contentFadeIn{from{opacity:0}to{opacity:1}}
+    .action-bar-content p{
+      font-size:14px;color:var(--text-dim);line-height:1.8;margin-bottom:12px;
+    }
+    .action-bar-content p:last-child{margin-bottom:0}
+    .action-bar-content strong{color:var(--text)}
+    
+    /* RESULTS */
+    .results-section{background:linear-gradient(180deg,var(--bg-card) 0%,var(--bg) 100%);position:relative;z-index:1}
+    .results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:60px}
+    .result-card{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:all 0.4s;animation:cardFloat 6s ease-in-out infinite;position:relative}
+    .result-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(0,255,136,0.05),transparent);opacity:0;transition:opacity 0.4s}
+    .result-card:hover::before{opacity:1}
+    .result-card:nth-child(1){animation-delay:0s}
+    .result-card:nth-child(2){animation-delay:1s}
+    .result-card:nth-child(3){animation-delay:2s}
+    @keyframes cardFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    .result-card:hover{border-color:var(--border-green);transform:translateY(-12px) scale(1.02);box-shadow:0 20px 60px rgba(0,255,136,0.15)}
+    .result-image{aspect-ratio:4/3;background:linear-gradient(135deg,var(--bg-light),var(--bg-card));display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;overflow:hidden}
+    .result-image::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(0,255,136,0.1),transparent 60%);animation:resultGlow 4s ease-in-out infinite}
+    @keyframes resultGlow{0%,100%{opacity:0.5;transform:scale(1)}50%{opacity:1;transform:scale(1.2)}}
+    .result-content{padding:24px}
+    .result-amount{font-size:28px;font-weight:800;color:var(--green);margin-bottom:8px;animation:amountPulse 2s ease-in-out infinite}
+    @keyframes amountPulse{0%,100%{text-shadow:0 0 10px rgba(0,255,136,0.3)}50%{text-shadow:0 0 25px rgba(0,255,136,0.6)}}
+    .result-text{font-size:14px;color:var(--text-dim);line-height:1.6}
+    
+    .testimonial-card{max-width:800px;margin:0 auto;padding:48px;background:var(--bg-card);border:2px solid transparent;background:linear-gradient(var(--bg-card),var(--bg-card)) padding-box,linear-gradient(135deg,var(--green),var(--cyan)) border-box;border-radius:24px;text-align:center;position:relative;animation:testimonialGlow 4s ease-in-out infinite;overflow:hidden}
+    .testimonial-card::before{content:'"';position:absolute;top:20px;left:40px;font-size:120px;color:var(--green);opacity:0.15;font-family:Georgia,serif;line-height:1;animation:quoteFloat 5s ease-in-out infinite}
+    @keyframes quoteFloat{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-10px) rotate(5deg)}}
+    @keyframes testimonialGlow{0%,100%{box-shadow:0 20px 60px rgba(0,255,136,0.1)}50%{box-shadow:0 30px 80px rgba(0,255,136,0.2)}}
+    .testimonial-card::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent,rgba(0,255,136,0.1),transparent,rgba(0,229,255,0.1),transparent);animation:testimonialRotate 10s linear infinite;pointer-events:none}
+    @keyframes testimonialRotate{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    .testimonial-badge{display:inline-block;padding:8px 16px;background:var(--green);color:#000;font-size:12px;font-weight:700;border-radius:8px;margin-bottom:20px;position:relative;z-index:1;animation:badgeShine 3s ease-in-out infinite}
+    @keyframes badgeShine{0%,100%{box-shadow:0 4px 15px rgba(0,255,136,0.3)}50%{box-shadow:0 6px 25px rgba(0,255,136,0.5)}}
+    .testimonial-text{font-size:22px;font-style:italic;line-height:1.7;margin-bottom:24px;position:relative;z-index:1}
+    .testimonial-text strong{color:var(--green);animation:strongGlow 2s ease-in-out infinite}
+    @keyframes strongGlow{0%,100%{text-shadow:none}50%{text-shadow:0 0 10px rgba(0,255,136,0.5)}}
+    .testimonial-author{font-size:14px;color:var(--text-dim);position:relative;z-index:1}
+    
+    /* WHY US */
+    .why-section{background:var(--bg);position:relative;z-index:1}
+    .why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+    .why-card{padding:36px;background:var(--bg-card);border:1px solid var(--border);border-radius:20px;text-align:center;transition:all 0.4s;position:relative;overflow:hidden}
+    .why-card::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(0,255,136,0.08) 0%,transparent 50%);opacity:0;transition:opacity 0.4s;animation:none}
+    .why-card:hover::before{opacity:1}
+    .why-card::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:3px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width 0.4s;border-radius:2px}
+    .why-card:hover::after{width:60%}
+    .why-card:hover{border-color:var(--border-green);transform:translateY(-10px);box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+    .why-card:nth-child(1){animation:fadeInUp 0.6s ease-out 0.1s both}
+    .why-card:nth-child(2){animation:fadeInUp 0.6s ease-out 0.2s both}
+    .why-card:nth-child(3){animation:fadeInUp 0.6s ease-out 0.3s both}
+    .why-card:nth-child(4){animation:fadeInUp 0.6s ease-out 0.4s both}
+    .why-card:nth-child(5){animation:fadeInUp 0.6s ease-out 0.5s both}
+    .why-card:nth-child(6){animation:fadeInUp 0.6s ease-out 0.6s both}
+    .why-icon{width:70px;height:70px;background:var(--green-dim);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:32px;transition:all 0.4s;animation:iconBounce 3s ease-in-out infinite;position:relative}
+    .why-card:nth-child(1) .why-icon{animation-delay:0s}
+    .why-card:nth-child(2) .why-icon{animation-delay:0.5s}
+    .why-card:nth-child(3) .why-icon{animation-delay:1s}
+    .why-card:nth-child(4) .why-icon{animation-delay:1.5s}
+    .why-card:nth-child(5) .why-icon{animation-delay:2s}
+    .why-card:nth-child(6) .why-icon{animation-delay:2.5s}
+    @keyframes iconBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    .why-icon::after{content:'';position:absolute;inset:-4px;border-radius:24px;border:2px solid var(--green);opacity:0;transition:all 0.4s}
+    .why-card:hover .why-icon{background:var(--green);transform:scale(1.1) rotate(5deg)}
+    .why-card:hover .why-icon::after{opacity:1;inset:-8px}
+    .why-title{font-size:20px;font-weight:700;margin-bottom:12px;transition:color 0.3s}
+    .why-card:hover .why-title{color:var(--green)}
+    .why-text{font-size:14px;color:var(--text-dim);line-height:1.7}
+    
+    /* FAQ */
+    .faq-section{background:linear-gradient(180deg,var(--bg) 0%,var(--bg-card) 100%);position:relative;z-index:1}
+    .faq-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:1000px;margin:0 auto}
+    .faq-item{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:all 0.4s;animation:slideInLeft 0.6s ease-out both}
+    .faq-item:nth-child(odd){animation-name:slideInLeft}
+    .faq-item:nth-child(even){animation-name:slideInRight}
+    .faq-item:nth-child(1){animation-delay:0.1s}
+    .faq-item:nth-child(2){animation-delay:0.15s}
+    .faq-item:nth-child(3){animation-delay:0.2s}
+    .faq-item:nth-child(4){animation-delay:0.25s}
+    .faq-item:nth-child(5){animation-delay:0.3s}
+    .faq-item:nth-child(6){animation-delay:0.35s}
+    .faq-item:nth-child(7){animation-delay:0.4s}
+    .faq-item:nth-child(8){animation-delay:0.45s}
+    @keyframes slideInLeft{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+    @keyframes slideInRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+    .faq-item:hover{border-color:var(--border-green);box-shadow:0 10px 40px rgba(0,0,0,0.2)}
+    .faq-item.open{border-color:var(--green);box-shadow:0 10px 40px rgba(0,255,136,0.1)}
+    .faq-header{padding:24px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;transition:background 0.3s}
+    .faq-header:hover{background:rgba(0,255,136,0.03)}
+    .faq-question{font-size:16px;font-weight:600;transition:color 0.3s}
+    .faq-item:hover .faq-question{color:var(--green)}
+    .faq-icon{width:32px;height:32px;background:var(--bg-light);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.4s}
+    .faq-icon svg{width:14px;height:14px;fill:var(--text-dim);transition:transform 0.4s}
+    .faq-item.open .faq-icon{background:var(--green);transform:rotate(180deg)}
+    .faq-item.open .faq-icon svg{fill:#000;transform:rotate(180deg)}
+    .faq-answer{max-height:0;overflow:hidden;transition:max-height 0.5s cubic-bezier(0.4,0,0.2,1)}
+    .faq-item.open .faq-answer{max-height:300px}
+    .faq-answer-inner{padding:0 24px 24px;font-size:14px;color:var(--text-dim);line-height:1.8}
+    
+    /* BROKERS */
+    .brokers-section{background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:60px 0;overflow:hidden;position:relative;z-index:1}
+    .brokers-section::before{content:'';position:absolute;left:0;top:0;bottom:0;width:100px;background:linear-gradient(90deg,var(--bg-card),transparent);z-index:2}
+    .brokers-section::after{content:'';position:absolute;right:0;top:0;bottom:0;width:100px;background:linear-gradient(270deg,var(--bg-card),transparent);z-index:2}
+    .brokers-title{text-align:center;font-size:14px;color:var(--text-muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:40px;animation:fadeInUp 0.6s ease-out}
+    .brokers-marquee{display:flex;gap:60px;animation:marquee 25s linear infinite}
+    .brokers-marquee:hover{animation-play-state:paused}
+    .broker-logo{font-size:20px;font-weight:700;color:var(--text-muted);white-space:nowrap;opacity:0.5;transition:all 0.4s;position:relative}
+    .broker-logo::after{content:'';position:absolute;bottom:-5px;left:0;width:0;height:2px;background:var(--green);transition:width 0.3s}
+    .broker-logo:hover{opacity:1;color:var(--green);transform:scale(1.1)}
+    .broker-logo:hover::after{width:100%}
+    @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+    
+    /* CTA */
+    .cta-section{background:linear-gradient(180deg,var(--bg) 0%,rgba(0,255,136,0.03) 100%);padding:120px 0;position:relative;z-index:1}
+    .cta-card{max-width:800px;margin:0 auto;padding:60px;background:var(--bg-card);border:2px solid transparent;background:linear-gradient(var(--bg-card),var(--bg-card)) padding-box,linear-gradient(135deg,var(--green),var(--cyan),var(--green)) border-box;background-size:100% 100%,300% 300%;border-radius:32px;text-align:center;position:relative;overflow:hidden;animation:ctaCardGlow 6s ease-in-out infinite}
+    @keyframes ctaCardGlow{0%,100%{background-position:0 0,0% 50%;box-shadow:0 30px 80px rgba(0,255,136,0.1)}50%{background-position:0 0,100% 50%;box-shadow:0 40px 100px rgba(0,255,136,0.2)}}
+    .cta-card::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:400px;height:400px;background:radial-gradient(circle,var(--green-glow),transparent 70%);opacity:0.3;pointer-events:none;animation:ctaGlowPulse 4s ease-in-out infinite}
+    @keyframes ctaGlowPulse{0%,100%{opacity:0.2;transform:translateX(-50%) scale(0.8)}50%{opacity:0.4;transform:translateX(-50%) scale(1.2)}}
+    .cta-card::after{content:'';position:absolute;inset:0;background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,0.03) 50%,transparent 60%);background-size:300% 300%;animation:ctaShine 5s linear infinite}
+    @keyframes ctaShine{0%{background-position:100% 100%}100%{background-position:0% 0%}}
+    .cta-title{font-size:clamp(28px,4vw,42px);font-weight:800;margin-bottom:16px;position:relative;animation:fadeInUp 0.6s ease-out}
+    .cta-subtitle{font-size:18px;color:var(--text-dim);margin-bottom:32px;position:relative;animation:fadeInUp 0.6s ease-out 0.1s both}
+    .cta-btn{display:inline-flex;align-items:center;gap:12px;padding:20px 48px;background:linear-gradient(135deg,var(--green),#00cc6a);color:#000;font-size:18px;font-weight:700;border-radius:14px;text-decoration:none;box-shadow:0 10px 40px var(--green-glow);transition:all 0.4s;position:relative;overflow:hidden;animation:fadeInUp 0.6s ease-out 0.2s both,ctaBtnPulse 2s ease-in-out infinite 1s}
+    @keyframes ctaBtnPulse{0%,100%{box-shadow:0 10px 40px var(--green-glow)}50%{box-shadow:0 15px 60px rgba(0,255,136,0.5)}}
+    .cta-btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);animation:btnShimmer 2.5s ease-in-out infinite}
+    @keyframes btnShimmer{0%{left:-100%}50%,100%{left:100%}}
+    .cta-btn:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 20px 60px var(--green-glow)}
+    .cta-note{margin-top:20px;font-size:13px;color:var(--text-muted);position:relative;animation:fadeInUp 0.6s ease-out 0.3s both}
+    
+    /* FOOTER */
+    .footer{background:var(--bg);border-top:1px solid var(--border);padding:60px 0 30px;position:relative;z-index:1}
+    .footer-top{display:flex;justify-content:space-between;align-items:flex-start;gap:40px;margin-bottom:40px;flex-wrap:wrap}
+    .footer-brand .footer-logo{font-size:28px;font-weight:800;color:var(--green);margin-bottom:12px;animation:logoGlow 3s ease-in-out infinite}
+    @keyframes logoGlow{0%,100%{text-shadow:0 0 10px rgba(0,255,136,0.3)}50%{text-shadow:0 0 30px rgba(0,255,136,0.6)}}
+    .footer-brand p{font-size:14px;color:var(--text-dim);max-width:300px;line-height:1.7}
+    .footer-links h4{font-size:14px;font-weight:700;margin-bottom:16px;text-transform:uppercase;letter-spacing:1px}
+    .footer-links a{display:block;font-size:14px;color:var(--text-dim);text-decoration:none;margin-bottom:10px;transition:all 0.3s;position:relative;padding-left:0}
+    .footer-links a::before{content:'→';position:absolute;left:-15px;opacity:0;transition:all 0.3s;color:var(--green)}
+    .footer-links a:hover{color:var(--green);padding-left:15px}
+    .footer-links a:hover::before{opacity:1;left:0}
+    .footer-social{display:flex;gap:12px}
+    .social-btn{width:44px;height:44px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;transition:all 0.4s;position:relative;overflow:hidden}
+    .social-btn::before{content:'';position:absolute;inset:0;background:var(--green);transform:scale(0);transition:transform 0.4s;border-radius:11px}
+    .social-btn:hover::before{transform:scale(1)}
+    .social-btn:hover{border-color:var(--green);transform:translateY(-4px)}
+    .social-btn svg{width:20px;height:20px;fill:var(--text-dim);position:relative;z-index:1;transition:fill 0.3s}
+    .social-btn:hover svg{fill:#000}
+    .footer-bottom{padding-top:30px;border-top:1px solid var(--border);text-align:center}
+    .footer-bottom p{font-size:12px;color:var(--text-muted);line-height:1.8}
+    .footer-bottom a{color:var(--text-dim);text-decoration:none;transition:color 0.3s}
+    .footer-bottom a:hover{color:var(--green)}
+    
+    /* DISCORD FLOAT */
+    .discord-float{position:fixed;bottom:24px;right:24px;z-index:99;animation:discordBounce 0.6s ease-out 2s both}
+    @keyframes discordBounce{from{transform:scale(0) rotate(-180deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+    .discord-btn{width:60px;height:60px;background:linear-gradient(135deg,#5865F2,#7289DA);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 30px rgba(88,101,242,0.4);cursor:pointer;transition:all 0.4s;text-decoration:none;position:relative;animation:discordPulse 2s ease-in-out infinite}
+    @keyframes discordPulse{0%,100%{box-shadow:0 8px 30px rgba(88,101,242,0.4)}50%{box-shadow:0 12px 50px rgba(88,101,242,0.6)}}
+    .discord-btn::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid #5865F2;opacity:0;animation:discordRipple 2s ease-out infinite}
+    .discord-btn::after{content:'';position:absolute;inset:-10px;border-radius:50%;border:2px solid #5865F2;opacity:0;animation:discordRipple 2s ease-out infinite 0.5s}
+    @keyframes discordRipple{0%{transform:scale(0.8);opacity:0.6}100%{transform:scale(1.3);opacity:0}}
+    .discord-btn:hover{transform:scale(1.15) rotate(10deg)}
+    .discord-btn svg{width:28px;height:28px;fill:#fff;animation:discordIcon 0.5s ease-in-out}
+    @keyframes discordIcon{0%,100%{transform:scale(1)}50%{transform:scale(0.9)}}
+    
+    /* LIVE NOTIFICATION TOAST */
+    .live-toast{
+      position:fixed;bottom:100px;left:24px;z-index:98;
+      display:flex;align-items:center;gap:12px;
+      padding:16px 20px;
+      background:var(--bg-card);
+      border:1px solid var(--border-green);
+      border-radius:12px;
+      box-shadow:0 10px 40px rgba(0,0,0,0.4),0 0 20px rgba(0,255,136,0.1);
+      transform:translateX(-120%);
+      opacity:0;
+      transition:all 0.5s cubic-bezier(0.68,-0.55,0.265,1.55);
+    }
+    .live-toast.show{transform:translateX(0);opacity:1}
+    .toast-icon{font-size:24px;animation:toastIconBounce 0.5s ease-out}
+    @keyframes toastIconBounce{0%{transform:scale(0)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+    .toast-content{display:flex;flex-direction:column;gap:2px}
+    .toast-title{font-size:13px;font-weight:700;color:var(--green)}
+    .toast-text{font-size:12px;color:var(--text-dim)}
+    
+    /* SPARKLE PARTICLES ON HOVER */
+    .sparkle{position:absolute;width:6px;height:6px;background:var(--green);border-radius:50%;pointer-events:none;animation:sparkleAnim 0.8s ease-out forwards}
+    @keyframes sparkleAnim{0%{transform:scale(1);opacity:1}100%{transform:scale(0);opacity:0}}
+    
+    /* SCROLL PROGRESS BAR */
+    .scroll-progress{
+      position:fixed;top:0;left:0;height:3px;
+      background:linear-gradient(90deg,var(--green),var(--cyan));
+      z-index:101;width:0%;
+      box-shadow:0 0 10px var(--green);
+      transition:width 0.1s;
+    }
+    
+    /* SCROLL-TRIGGERED ANIMATIONS */
+    .reveal{opacity:0;transform:translateY(60px);transition:all 0.8s cubic-bezier(0.4,0,0.2,1)}
+    .reveal.active{opacity:1;transform:translateY(0)}
+    
+    .reveal-left{opacity:0;transform:translateX(-80px);transition:all 0.8s cubic-bezier(0.4,0,0.2,1)}
+    .reveal-left.active{opacity:1;transform:translateX(0)}
+    
+    .reveal-right{opacity:0;transform:translateX(80px);transition:all 0.8s cubic-bezier(0.4,0,0.2,1)}
+    .reveal-right.active{opacity:1;transform:translateX(0)}
+    
+    .reveal-scale{opacity:0;transform:scale(0.8);transition:all 0.8s cubic-bezier(0.4,0,0.2,1)}
+    .reveal-scale.active{opacity:1;transform:scale(1)}
+    
+    .reveal-rotate{opacity:0;transform:rotate(-10deg) translateY(40px);transition:all 0.8s cubic-bezier(0.4,0,0.2,1)}
+    .reveal-rotate.active{opacity:1;transform:rotate(0) translateY(0)}
+    
+    .reveal-flip{opacity:0;transform:perspective(1000px) rotateX(-30deg);transition:all 0.8s cubic-bezier(0.4,0,0.2,1)}
+    .reveal-flip.active{opacity:1;transform:perspective(1000px) rotateX(0)}
+    
+    /* Staggered children */
+    .stagger-children .stagger-item{opacity:0;transform:translateY(40px);transition:all 0.6s cubic-bezier(0.4,0,0.2,1)}
+    .stagger-children.active .stagger-item{opacity:1;transform:translateY(0)}
+    .stagger-children.active .stagger-item:nth-child(1){transition-delay:0.1s}
+    .stagger-children.active .stagger-item:nth-child(2){transition-delay:0.2s}
+    .stagger-children.active .stagger-item:nth-child(3){transition-delay:0.3s}
+    .stagger-children.active .stagger-item:nth-child(4){transition-delay:0.4s}
+    .stagger-children.active .stagger-item:nth-child(5){transition-delay:0.5s}
+    .stagger-children.active .stagger-item:nth-child(6){transition-delay:0.6s}
+    .stagger-children.active .stagger-item:nth-child(7){transition-delay:0.7s}
+    .stagger-children.active .stagger-item:nth-child(8){transition-delay:0.8s}
+    
+    /* Parallax effect */
+    .parallax{transition:transform 0.1s linear}
+    
+    /* Counter animation */
+    .count-up{transition:all 0.3s}
+    
+    /* Glowing border on scroll */
+    .glow-on-scroll{transition:box-shadow 0.5s,border-color 0.5s}
+    .glow-on-scroll.active{box-shadow:0 0 40px var(--green-glow);border-color:var(--green)}
+    
+    /* Typewriter effect */
+    .typewriter{overflow:hidden;white-space:nowrap;border-right:3px solid var(--green);width:0;transition:width 2s steps(40,end)}
+    .typewriter.active{width:100%}
+    
+    /* Draw line animation */
+    .draw-line{width:0;transition:width 1s ease-out}
+    .draw-line.active{width:100%}
+    
+    /* Pulse on scroll */
+    .pulse-on-scroll.active{animation:scrollPulse 0.6s ease-out}
+    @keyframes scrollPulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+    
+    /* Bounce in */
+    .bounce-in{opacity:0;transform:scale(0.3);transition:all 0.6s cubic-bezier(0.68,-0.55,0.265,1.55)}
+    .bounce-in.active{opacity:1;transform:scale(1)}
+    
+    /* Slide up with fade */
+    .slide-fade{opacity:0;transform:translateY(100px);filter:blur(10px);transition:all 1s cubic-bezier(0.4,0,0.2,1)}
+    .slide-fade.active{opacity:1;transform:translateY(0);filter:blur(0)}
+    
+    /* Zoom and rotate */
+    .zoom-rotate{opacity:0;transform:scale(0.5) rotate(-20deg);transition:all 0.8s cubic-bezier(0.4,0,0.2,1)}
+    .zoom-rotate.active{opacity:1;transform:scale(1) rotate(0)}
+    
+    /* Wave effect for multiple items */
+    .wave-reveal .wave-item{opacity:0;transform:translateY(50px)}
+    .wave-reveal.active .wave-item{opacity:1;transform:translateY(0);transition:all 0.6s cubic-bezier(0.4,0,0.2,1)}
+    .wave-reveal.active .wave-item:nth-child(1){transition-delay:0s}
+    .wave-reveal.active .wave-item:nth-child(2){transition-delay:0.08s}
+    .wave-reveal.active .wave-item:nth-child(3){transition-delay:0.16s}
+    .wave-reveal.active .wave-item:nth-child(4){transition-delay:0.24s}
+    .wave-reveal.active .wave-item:nth-child(5){transition-delay:0.32s}
+    .wave-reveal.active .wave-item:nth-child(6){transition-delay:0.4s}
+    
+    /* Morphing background on scroll */
+    .morph-bg{background-size:100% 100%;transition:background-size 1s ease-out}
+    .morph-bg.active{background-size:120% 120%}
+    
+    /* Text highlight sweep */
+    .highlight-sweep{background:linear-gradient(90deg,transparent 50%,rgba(0,255,136,0.2) 50%);background-size:200% 100%;background-position:100% 0;transition:background-position 0.8s ease-out}
+    .highlight-sweep.active{background-position:0% 0}
+    
+    /* 3D card tilt on scroll */
+    .tilt-card{transform:perspective(1000px) rotateY(0deg) rotateX(0deg);transition:transform 0.3s ease-out}
+    .tilt-card.active{animation:tiltIn 0.8s ease-out forwards}
+    @keyframes tiltIn{0%{transform:perspective(1000px) rotateY(-20deg) rotateX(10deg);opacity:0}100%{transform:perspective(1000px) rotateY(0deg) rotateX(0deg);opacity:1}}
+    
+    /* Expand from center */
+    .expand-center{opacity:0;transform:scaleX(0);transition:all 0.8s cubic-bezier(0.4,0,0.2,1)}
+    .expand-center.active{opacity:1;transform:scaleX(1)}
+    
+    /* Blur to sharp */
+    .blur-in{opacity:0;filter:blur(20px);transform:scale(1.1);transition:all 1s ease-out}
+    .blur-in.active{opacity:1;filter:blur(0);transform:scale(1)}
+    
+    /* Section divider animation */
+    .section-divider{height:2px;background:linear-gradient(90deg,transparent,var(--green),var(--cyan),var(--green),transparent);transform:scaleX(0);transition:transform 1.2s ease-out;margin:40px 0}
+    .section-divider.active{transform:scaleX(1)}
+    
+    /* SCROLL-BASED COLOR SHIFTS */
+    .color-shift{transition:background 1s ease-out}
+    .color-shift.active{background:linear-gradient(135deg,rgba(0,255,136,0.03),transparent)}
+    
+    /* ZOOM ON SCROLL */
+    .zoom-on-scroll{transition:transform 0.5s ease-out}
+    .zoom-on-scroll.active{transform:scale(1.02)}
+    
+    /* TEXT REVEAL LINE BY LINE */
+    .text-reveal p{opacity:0;transform:translateY(20px);transition:all 0.6s ease-out}
+    .text-reveal.active p{opacity:1;transform:translateY(0)}
+    .text-reveal.active p:nth-child(1){transition-delay:0.1s}
+    .text-reveal.active p:nth-child(2){transition-delay:0.2s}
+    .text-reveal.active p:nth-child(3){transition-delay:0.3s}
+    .text-reveal.active p:nth-child(4){transition-delay:0.4s}
+    .text-reveal.active p:nth-child(5){transition-delay:0.5s}
+    
+    /* BORDER DRAW EFFECT */
+    .border-draw{position:relative}
+    .border-draw::before,.border-draw::after{content:'';position:absolute;background:var(--green);transition:all 0.6s ease-out}
+    .border-draw::before{top:0;left:0;width:0;height:2px}
+    .border-draw::after{bottom:0;right:0;width:0;height:2px}
+    .border-draw.active::before,.border-draw.active::after{width:100%}
+    
+    /* FLOATING ANIMATION ON SCROLL */
+    .float-on-scroll{transition:transform 0.3s ease-out}
+    .float-on-scroll.active{animation:floatUpDown 3s ease-in-out infinite}
+    @keyframes floatUpDown{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+    
+    /* GLOW INTENSIFY ON SCROLL */
+    .glow-intensify{transition:all 0.8s ease-out}
+    .glow-intensify.active{box-shadow:0 0 50px rgba(0,255,136,0.3),0 0 100px rgba(0,255,136,0.1)}
+    
+    /* SLIDE AND FADE COMBO */
+    .slide-fade-left{opacity:0;transform:translateX(-100px);filter:blur(5px);transition:all 0.8s cubic-bezier(0.4,0,0.2,1)}
+    .slide-fade-left.active{opacity:1;transform:translateX(0);filter:blur(0)}
+    
+    .slide-fade-right{opacity:0;transform:translateX(100px);filter:blur(5px);transition:all 0.8s cubic-bezier(0.4,0,0.2,1)}
+    .slide-fade-right.active{opacity:1;transform:translateX(0);filter:blur(0)}
+    
+    /* SKEW ANIMATION */
+    .skew-in{opacity:0;transform:skewY(5deg) translateY(50px);transition:all 0.8s cubic-bezier(0.4,0,0.2,1)}
+    .skew-in.active{opacity:1;transform:skewY(0) translateY(0)}
+    
+    /* CLIP PATH REVEAL */
+    .clip-reveal{clip-path:inset(0 100% 0 0);transition:clip-path 1s cubic-bezier(0.4,0,0.2,1)}
+    .clip-reveal.active{clip-path:inset(0 0 0 0)}
+    
+    /* SHAKE ON SCROLL */
+    .shake-on-scroll.active{animation:shakeIn 0.6s ease-out}
+    @keyframes shakeIn{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+    
+    /* SCROLL SHADOW */
+    .scroll-shadow{transition:box-shadow 0.5s ease-out}
+    .scroll-shadow.active{box-shadow:0 25px 80px rgba(0,0,0,0.4),0 0 40px rgba(0,255,136,0.1)}
+    
+    /* POP IN EFFECT */
+    .pop-in{opacity:0;transform:scale(0);transition:all 0.5s cubic-bezier(0.175,0.885,0.32,1.275)}
+    .pop-in.active{opacity:1;transform:scale(1)}
+    
+    /* ROTATE IN */
+    .rotate-in{opacity:0;transform:rotate(-180deg) scale(0.5);transition:all 0.8s cubic-bezier(0.4,0,0.2,1)}
+    .rotate-in.active{opacity:1;transform:rotate(0) scale(1)}
+    
+    /* UNDERLINE GROW */
+    .underline-grow{position:relative}
+    .underline-grow::after{content:'';position:absolute;bottom:-5px;left:50%;width:0;height:3px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:all 0.6s ease-out;transform:translateX(-50%)}
+    .underline-grow.active::after{width:80%}
+    
+    /* RESPONSIVE */
+    @media(max-width:1024px){
+      .stats-grid{grid-template-columns:repeat(2,1fr)}
+      .results-grid{grid-template-columns:repeat(2,1fr)}
+      .why-grid{grid-template-columns:repeat(2,1fr)}
+      .faq-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:768px){
+      .nav{padding:16px 20px}
+      .nav-links{display:none}
+      .mobile-menu{display:flex}
+      .stats-grid{grid-template-columns:repeat(2,1fr);gap:24px}
+      .results-grid{grid-template-columns:1fr}
+      .why-grid{grid-template-columns:1fr}
+      .step-card{flex-direction:column;text-align:center}
+      .footer-top{flex-direction:column;align-items:center;text-align:center}
+    }
+  </style>
+</head>
+<body>
+  <!-- SCROLL PROGRESS BAR -->
+  <div class="scroll-progress" id="scrollProgress"></div>
+
+  <!-- ========== EXTENSIVE BACKGROUND GRAPHICS ========== -->
+  <div class="bg-graphics-container">
+    <!-- LARGE DECORATIVE CIRCLES -->
+    <div class="bg-circle bg-circle-1"></div>
+    <div class="bg-circle bg-circle-2"></div>
+    <div class="bg-circle bg-circle-3"></div>
+    <div class="bg-circle bg-circle-4"></div>
+    <div class="bg-circle bg-circle-5"></div>
+    
+    <!-- DIAGONAL ACCENT LINES -->
+    <div class="bg-diagonal bg-diagonal-1"></div>
+    <div class="bg-diagonal bg-diagonal-2"></div>
+    <div class="bg-diagonal bg-diagonal-3"></div>
+    <div class="bg-diagonal bg-diagonal-4"></div>
+    
+    <!-- GRADIENT BLOBS -->
+    <div class="bg-blob bg-blob-1"></div>
+    <div class="bg-blob bg-blob-2"></div>
+    <div class="bg-blob bg-blob-3"></div>
+    <div class="bg-blob bg-blob-4"></div>
+    <div class="bg-blob bg-blob-5"></div>
+    
+    <!-- HEXAGON GRIDS -->
+    <div class="bg-hexagons bg-hexagons-1">
+      <div class="hexagon" style="left:5%;top:10%"></div>
+      <div class="hexagon" style="left:18%;top:60%"></div>
+      <div class="hexagon" style="left:30%;top:25%"></div>
+      <div class="hexagon" style="left:45%;top:75%"></div>
+      <div class="hexagon" style="left:58%;top:15%"></div>
+      <div class="hexagon" style="left:72%;top:55%"></div>
+      <div class="hexagon" style="left:85%;top:30%"></div>
+      <div class="hexagon" style="left:92%;top:70%"></div>
+    </div>
+    <div class="bg-hexagons bg-hexagons-2">
+      <div class="hexagon" style="left:8%;top:20%"></div>
+      <div class="hexagon" style="left:22%;top:70%"></div>
+      <div class="hexagon" style="left:35%;top:35%"></div>
+      <div class="hexagon" style="left:50%;top:80%"></div>
+      <div class="hexagon" style="left:65%;top:25%"></div>
+      <div class="hexagon" style="left:78%;top:65%"></div>
+      <div class="hexagon" style="left:90%;top:40%"></div>
+    </div>
+    <div class="bg-hexagons bg-hexagons-3">
+      <div class="hexagon" style="left:3%;top:30%"></div>
+      <div class="hexagon" style="left:15%;top:75%"></div>
+      <div class="hexagon" style="left:28%;top:15%"></div>
+      <div class="hexagon" style="left:42%;top:65%"></div>
+      <div class="hexagon" style="left:55%;top:35%"></div>
+      <div class="hexagon" style="left:70%;top:80%"></div>
+      <div class="hexagon" style="left:82%;top:20%"></div>
+    </div>
+    
+    <!-- DATA NODES WITH CONNECTIONS -->
+    <div class="bg-nodes bg-nodes-1">
+      <div class="data-node" style="left:10%;top:20%"></div>
+      <div class="data-node" style="left:25%;top:55%"></div>
+      <div class="data-node" style="left:42%;top:30%"></div>
+      <div class="data-node" style="left:58%;top:70%"></div>
+      <div class="data-node" style="left:75%;top:25%"></div>
+      <div class="data-node" style="left:88%;top:60%"></div>
+    </div>
+    <div class="bg-nodes bg-nodes-2">
+      <div class="data-node" style="left:8%;top:35%"></div>
+      <div class="data-node" style="left:22%;top:70%"></div>
+      <div class="data-node" style="left:38%;top:20%"></div>
+      <div class="data-node" style="left:55%;top:55%"></div>
+      <div class="data-node" style="left:72%;top:40%"></div>
+      <div class="data-node" style="left:90%;top:75%"></div>
+    </div>
+    
+    <!-- CHART BAR PATTERNS -->
+    <div class="bg-chart-pattern bg-chart-pattern-1">
+      <div class="chart-bar" style="left:5%;height:40%"></div>
+      <div class="chart-bar" style="left:10%;height:70%"></div>
+      <div class="chart-bar" style="left:15%;height:45%"></div>
+      <div class="chart-bar" style="left:20%;height:85%"></div>
+      <div class="chart-bar" style="left:25%;height:55%"></div>
+      <div class="chart-bar" style="left:30%;height:75%"></div>
+      <div class="chart-bar" style="left:35%;height:35%"></div>
+      <div class="chart-bar" style="left:40%;height:90%"></div>
+      <div class="chart-bar" style="left:45%;height:60%"></div>
+      <div class="chart-bar" style="left:50%;height:50%"></div>
+      <div class="chart-bar" style="left:55%;height:80%"></div>
+      <div class="chart-bar" style="left:60%;height:40%"></div>
+      <div class="chart-bar" style="left:65%;height:95%"></div>
+      <div class="chart-bar" style="left:70%;height:55%"></div>
+      <div class="chart-bar" style="left:75%;height:70%"></div>
+      <div class="chart-bar" style="left:80%;height:45%"></div>
+      <div class="chart-bar" style="left:85%;height:65%"></div>
+      <div class="chart-bar" style="left:90%;height:85%"></div>
+      <div class="chart-bar" style="left:95%;height:50%"></div>
+    </div>
+    <div class="bg-chart-pattern bg-chart-pattern-2">
+      <div class="chart-bar" style="left:3%;height:60%"></div>
+      <div class="chart-bar" style="left:8%;height:45%"></div>
+      <div class="chart-bar" style="left:13%;height:80%"></div>
+      <div class="chart-bar" style="left:18%;height:35%"></div>
+      <div class="chart-bar" style="left:23%;height:70%"></div>
+      <div class="chart-bar" style="left:28%;height:55%"></div>
+      <div class="chart-bar" style="left:33%;height:90%"></div>
+      <div class="chart-bar" style="left:38%;height:40%"></div>
+      <div class="chart-bar" style="left:43%;height:75%"></div>
+      <div class="chart-bar" style="left:48%;height:50%"></div>
+      <div class="chart-bar" style="left:53%;height:85%"></div>
+      <div class="chart-bar" style="left:58%;height:30%"></div>
+      <div class="chart-bar" style="left:63%;height:65%"></div>
+      <div class="chart-bar" style="left:68%;height:95%"></div>
+      <div class="chart-bar" style="left:73%;height:45%"></div>
+      <div class="chart-bar" style="left:78%;height:70%"></div>
+      <div class="chart-bar" style="left:83%;height:55%"></div>
+      <div class="chart-bar" style="left:88%;height:80%"></div>
+      <div class="chart-bar" style="left:93%;height:60%"></div>
+    </div>
+    
+    <!-- CROSSHAIR TARGETS -->
+    <div class="bg-crosshair bg-crosshair-1"><div class="crosshair-circle"></div></div>
+    <div class="bg-crosshair bg-crosshair-2"><div class="crosshair-circle"></div></div>
+    <div class="bg-crosshair bg-crosshair-3"><div class="crosshair-circle"></div></div>
+    <div class="bg-crosshair bg-crosshair-4"><div class="crosshair-circle"></div></div>
+    
+    <!-- PERCENTAGE INDICATORS -->
+    <div class="bg-percent bg-percent-1 positive">+127.4%</div>
+    <div class="bg-percent bg-percent-2 negative">-23.8%</div>
+    <div class="bg-percent bg-percent-3 positive">+89.2%</div>
+    <div class="bg-percent bg-percent-4 positive">+156.7%</div>
+    <div class="bg-percent bg-percent-5 negative">-12.3%</div>
+    <div class="bg-percent bg-percent-6 positive">+234.5%</div>
+    
+    <!-- BINARY CODE STREAMS -->
+    <div class="bg-binary bg-binary-1">01001010 11010010 00101101 10110100 01101001 00010110 10101010 01010101 11001100 00110011 01001010 11010010 00101101 10110100 01101001 00010110 10101010 01010101 11001100 00110011 01001010 11010010 00101101 10110100 01101001 00010110 10101010 01010101 11001100 00110011</div>
+    <div class="bg-binary bg-binary-2">10110100 01101001 00010110 10101010 01010101 11001100 00110011 01001010 11010010 00101101 10110100 01101001 00010110 10101010 01010101 11001100 00110011 01001010 11010010 00101101 10110100 01101001 00010110 10101010 01010101 11001100 00110011 01001010 11010010 00101101</div>
+    <div class="bg-binary bg-binary-3">00110011 01001010 11010010 00101101 10110100 01101001 00010110 10101010 01010101 11001100 00110011 01001010 11010010 00101101 10110100 01101001 00010110 10101010 01010101 11001100 00110011 01001010 11010010 00101101 10110100 01101001 00010110 10101010 01010101 11001100</div>
+    
+    <!-- WAVE SVG PATTERNS -->
+    <div class="bg-wave bg-wave-1">
+      <svg viewBox="0 0 1440 150" preserveAspectRatio="none">
+        <path class="wave-path" d="M0,75 C360,150 720,0 1080,75 C1260,112 1350,37 1440,75" stroke-dasharray="1000" stroke-dashoffset="1000"/>
+        <path class="wave-path wave-path-2" d="M0,100 C360,25 720,175 1080,100 C1260,62 1350,137 1440,100" stroke-dasharray="1000" stroke-dashoffset="1000"/>
+      </svg>
+    </div>
+    <div class="bg-wave bg-wave-2">
+      <svg viewBox="0 0 1440 150" preserveAspectRatio="none">
+        <path class="wave-path" d="M0,50 C480,150 960,0 1440,100" stroke-dasharray="1000" stroke-dashoffset="1000"/>
+        <path class="wave-path wave-path-2" d="M0,100 C480,0 960,150 1440,50" stroke-dasharray="1000" stroke-dashoffset="1000"/>
+      </svg>
+    </div>
+    <div class="bg-wave bg-wave-3">
+      <svg viewBox="0 0 1440 150" preserveAspectRatio="none">
+        <path class="wave-path" d="M0,75 C240,0 480,150 720,75 C960,0 1200,150 1440,75" stroke-dasharray="1000" stroke-dashoffset="1000"/>
+      </svg>
+    </div>
+    
+    <!-- ARROW INDICATORS -->
+    <div class="bg-arrows bg-arrows-1">
+      <div class="arrow-up" style="left:10%;top:20%"></div>
+      <div class="arrow-up" style="left:30%;top:60%"></div>
+      <div class="arrow-down" style="left:50%;top:30%"></div>
+      <div class="arrow-up" style="left:70%;top:70%"></div>
+      <div class="arrow-down" style="left:85%;top:40%"></div>
+    </div>
+    <div class="bg-arrows bg-arrows-2">
+      <div class="arrow-down" style="left:15%;top:35%"></div>
+      <div class="arrow-up" style="left:35%;top:75%"></div>
+      <div class="arrow-up" style="left:55%;top:25%"></div>
+      <div class="arrow-down" style="left:75%;top:65%"></div>
+      <div class="arrow-up" style="left:90%;top:45%"></div>
+    </div>
+    
+    <!-- CANDLESTICK WICKS -->
+    <div class="bg-candles bg-candles-1">
+      <div class="wick" style="height:80px"></div>
+      <div class="wick" style="height:120px"></div>
+      <div class="wick" style="height:60px"></div>
+      <div class="wick" style="height:150px"></div>
+      <div class="wick" style="height:90px"></div>
+      <div class="wick" style="height:130px"></div>
+      <div class="wick" style="height:70px"></div>
+      <div class="wick" style="height:110px"></div>
+      <div class="wick" style="height:140px"></div>
+      <div class="wick" style="height:85px"></div>
+      <div class="wick" style="height:100px"></div>
+      <div class="wick" style="height:125px"></div>
+      <div class="wick" style="height:75px"></div>
+      <div class="wick" style="height:95px"></div>
+      <div class="wick" style="height:145px"></div>
+    </div>
+    <div class="bg-candles bg-candles-2">
+      <div class="wick" style="height:95px"></div>
+      <div class="wick" style="height:135px"></div>
+      <div class="wick" style="height:55px"></div>
+      <div class="wick" style="height:115px"></div>
+      <div class="wick" style="height:85px"></div>
+      <div class="wick" style="height:145px"></div>
+      <div class="wick" style="height:65px"></div>
+      <div class="wick" style="height:105px"></div>
+      <div class="wick" style="height:130px"></div>
+      <div class="wick" style="height:75px"></div>
+      <div class="wick" style="height:155px"></div>
+      <div class="wick" style="height:90px"></div>
+      <div class="wick" style="height:120px"></div>
+      <div class="wick" style="height:70px"></div>
+      <div class="wick" style="height:140px"></div>
+    </div>
+    
+    <!-- DOLLAR SIGNS -->
+    <div class="bg-dollars">
+      <div class="dollar" style="top:130vh;left:5%">$</div>
+      <div class="dollar" style="top:180vh;left:88%">$</div>
+      <div class="dollar" style="top:240vh;left:12%">$</div>
+      <div class="dollar" style="top:300vh;left:92%">$</div>
+      <div class="dollar" style="top:360vh;left:8%">$</div>
+      <div class="dollar" style="top:420vh;left:85%">$</div>
+      <div class="dollar" style="top:480vh;left:15%">$</div>
+      <div class="dollar" style="top:540vh;left:90%">$</div>
+    </div>
+    
+    <!-- TRADING ICONS -->
+    <div class="bg-icons">
+      <div class="trade-icon" style="top:155vh;left:3%">📊</div>
+      <div class="trade-icon" style="top:215vh;right:5%">📈</div>
+      <div class="trade-icon" style="top:285vh;left:6%">💹</div>
+      <div class="trade-icon" style="top:355vh;right:4%">🎯</div>
+      <div class="trade-icon" style="top:425vh;left:4%">💰</div>
+      <div class="trade-icon" style="top:485vh;right:6%">🚀</div>
+      <div class="trade-icon" style="top:545vh;left:5%">⚡</div>
+      <div class="trade-icon" style="top:595vh;right:3%">💎</div>
+    </div>
+    
+    <!-- PULSE RINGS -->
+    <div class="bg-pulse-ring bg-pulse-ring-1"></div>
+    <div class="bg-pulse-ring bg-pulse-ring-2"></div>
+    <div class="bg-pulse-ring bg-pulse-ring-3"></div>
+    <div class="bg-pulse-ring bg-pulse-ring-4"></div>
+    
+    <!-- GRID OVERLAYS -->
+    <div class="bg-grid-section bg-grid-section-1"></div>
+    <div class="bg-grid-section bg-grid-section-2"></div>
+    
+    <!-- LINE CONNECTORS -->
+    <div class="bg-connector bg-connector-1"></div>
+    <div class="bg-connector bg-connector-2"></div>
+    <div class="bg-connector bg-connector-3"></div>
+    
+    <!-- DIAMONDS -->
+    <div class="bg-diamond bg-diamond-1"></div>
+    <div class="bg-diamond bg-diamond-2"></div>
+    <div class="bg-diamond bg-diamond-3"></div>
+    <div class="bg-diamond bg-diamond-4"></div>
+    
+    <!-- TRIANGLES -->
+    <div class="bg-triangle bg-triangle-1"></div>
+    <div class="bg-triangle bg-triangle-2"></div>
+    <div class="bg-triangle bg-triangle-3"></div>
+    <div class="bg-triangle bg-triangle-4"></div>
+    <div class="bg-triangle bg-triangle-5"></div>
+    
+    <!-- DOTTED CIRCLES -->
+    <div class="bg-dotted-circle bg-dotted-circle-1"></div>
+    <div class="bg-dotted-circle bg-dotted-circle-2"></div>
+    <div class="bg-dotted-circle bg-dotted-circle-3"></div>
+    <div class="bg-dotted-circle bg-dotted-circle-4"></div>
+    
+    <!-- STOCK TICKERS -->
+    <div class="bg-ticker bg-ticker-1">
+      <div class="ticker-content">
+        <span class="ticker-item up">AAPL +2.34%</span>
+        <span class="ticker-item down">TSLA -1.87%</span>
+        <span class="ticker-item up">NVDA +5.21%</span>
+        <span class="ticker-item up">MSFT +1.45%</span>
+        <span class="ticker-item down">META -0.98%</span>
+        <span class="ticker-item up">GOOG +3.12%</span>
+        <span class="ticker-item up">AMZN +2.67%</span>
+        <span class="ticker-item down">NFLX -2.34%</span>
+        <span class="ticker-item up">AAPL +2.34%</span>
+        <span class="ticker-item down">TSLA -1.87%</span>
+        <span class="ticker-item up">NVDA +5.21%</span>
+        <span class="ticker-item up">MSFT +1.45%</span>
+        <span class="ticker-item down">META -0.98%</span>
+        <span class="ticker-item up">GOOG +3.12%</span>
+        <span class="ticker-item up">AMZN +2.67%</span>
+        <span class="ticker-item down">NFLX -2.34%</span>
+      </div>
+    </div>
+    <div class="bg-ticker bg-ticker-2">
+      <div class="ticker-content">
+        <span class="ticker-item up">EUR/USD +0.45%</span>
+        <span class="ticker-item down">GBP/USD -0.32%</span>
+        <span class="ticker-item up">USD/JPY +0.78%</span>
+        <span class="ticker-item up">BTC +4.56%</span>
+        <span class="ticker-item down">ETH -1.23%</span>
+        <span class="ticker-item up">XRP +2.89%</span>
+        <span class="ticker-item up">EUR/USD +0.45%</span>
+        <span class="ticker-item down">GBP/USD -0.32%</span>
+        <span class="ticker-item up">USD/JPY +0.78%</span>
+        <span class="ticker-item up">BTC +4.56%</span>
+        <span class="ticker-item down">ETH -1.23%</span>
+        <span class="ticker-item up">XRP +2.89%</span>
+      </div>
+    </div>
+    <div class="bg-ticker bg-ticker-3">
+      <div class="ticker-content">
+        <span class="ticker-item up">SPY +1.23%</span>
+        <span class="ticker-item up">QQQ +1.89%</span>
+        <span class="ticker-item down">VIX -5.67%</span>
+        <span class="ticker-item up">DIA +0.98%</span>
+        <span class="ticker-item up">IWM +2.12%</span>
+        <span class="ticker-item down">TLT -0.45%</span>
+        <span class="ticker-item up">SPY +1.23%</span>
+        <span class="ticker-item up">QQQ +1.89%</span>
+        <span class="ticker-item down">VIX -5.67%</span>
+        <span class="ticker-item up">DIA +0.98%</span>
+        <span class="ticker-item up">IWM +2.12%</span>
+        <span class="ticker-item down">TLT -0.45%</span>
+      </div>
+    </div>
+    
+    <!-- PRICE LEVELS -->
+    <div class="bg-price-level bg-price-level-1" data-price="$42,847.50"></div>
+    <div class="bg-price-level bg-price-level-2" data-price="$1.0892"></div>
+    <div class="bg-price-level bg-price-level-3" data-price="$189.45"></div>
+    <div class="bg-price-level bg-price-level-4" data-price="$2,847.30"></div>
+    <div class="bg-price-level bg-price-level-5" data-price="$0.6234"></div>
+    
+    <!-- SPARKLE STARS -->
+    <div class="bg-sparkle" style="top:178vh;left:25%"></div>
+    <div class="bg-sparkle" style="top:212vh;right:30%"></div>
+    <div class="bg-sparkle" style="top:278vh;left:15%"></div>
+    <div class="bg-sparkle" style="top:342vh;right:22%"></div>
+    <div class="bg-sparkle" style="top:398vh;left:28%"></div>
+    <div class="bg-sparkle" style="top:458vh;right:18%"></div>
+    <div class="bg-sparkle" style="top:512vh;left:20%"></div>
+    <div class="bg-sparkle" style="top:568vh;right:25%"></div>
+    
+    <!-- ORBIT RINGS -->
+    <div class="bg-orbit bg-orbit-1"></div>
+    <div class="bg-orbit bg-orbit-2"></div>
+    <div class="bg-orbit bg-orbit-3"></div>
+    
+    <!-- CURRENCY PAIRS -->
+    <div class="bg-currency bg-currency-1">EUR/USD</div>
+    <div class="bg-currency bg-currency-2">BTC/USDT</div>
+    <div class="bg-currency bg-currency-3">GBP/JPY</div>
+    <div class="bg-currency bg-currency-4">XAU/USD</div>
+    <div class="bg-currency bg-currency-5">ETH/BTC</div>
+    
+    <!-- RISING BARS -->
+    <div class="bg-rising-bars bg-rising-bars-1">
+      <div class="rising-bar" style="animation-delay:0s"></div>
+      <div class="rising-bar" style="animation-delay:0.1s"></div>
+      <div class="rising-bar" style="animation-delay:0.2s"></div>
+      <div class="rising-bar" style="animation-delay:0.3s"></div>
+      <div class="rising-bar" style="animation-delay:0.4s"></div>
+      <div class="rising-bar" style="animation-delay:0.5s"></div>
+      <div class="rising-bar" style="animation-delay:0.6s"></div>
+      <div class="rising-bar" style="animation-delay:0.7s"></div>
+      <div class="rising-bar" style="animation-delay:0.8s"></div>
+      <div class="rising-bar" style="animation-delay:0.9s"></div>
+      <div class="rising-bar" style="animation-delay:1.0s"></div>
+      <div class="rising-bar" style="animation-delay:1.1s"></div>
+    </div>
+    <div class="bg-rising-bars bg-rising-bars-2">
+      <div class="rising-bar" style="animation-delay:0s"></div>
+      <div class="rising-bar" style="animation-delay:0.15s"></div>
+      <div class="rising-bar" style="animation-delay:0.3s"></div>
+      <div class="rising-bar" style="animation-delay:0.45s"></div>
+      <div class="rising-bar" style="animation-delay:0.6s"></div>
+      <div class="rising-bar" style="animation-delay:0.75s"></div>
+      <div class="rising-bar" style="animation-delay:0.9s"></div>
+      <div class="rising-bar" style="animation-delay:1.05s"></div>
+      <div class="rising-bar" style="animation-delay:1.2s"></div>
+      <div class="rising-bar" style="animation-delay:1.35s"></div>
+    </div>
+    
+    <!-- FLOATING NUMBERS -->
+    <div class="bg-float-num bg-float-num-1">1.2847</div>
+    <div class="bg-float-num bg-float-num-2">42,857</div>
+    <div class="bg-float-num bg-float-num-3">0.9234</div>
+    <div class="bg-float-num bg-float-num-4">189.45</div>
+    <div class="bg-float-num bg-float-num-5">2,847</div>
+    
+    <!-- GLITCH LINES -->
+    <div class="bg-glitch bg-glitch-1"></div>
+    <div class="bg-glitch bg-glitch-2"></div>
+    <div class="bg-glitch bg-glitch-3"></div>
+    
+    <!-- PIE CHARTS -->
+    <div class="bg-pie bg-pie-1"></div>
+    <div class="bg-pie bg-pie-2"></div>
+    <div class="bg-pie bg-pie-3"></div>
+    
+    <!-- LINE GRAPHS -->
+    <div class="bg-line-graph bg-line-graph-1">
+      <svg viewBox="0 0 300 150" preserveAspectRatio="none">
+        <path class="graph-line" d="M0,120 Q50,80 100,90 T150,60 T200,80 T250,40 T300,50" stroke-dasharray="500"/>
+        <path class="graph-line graph-line-2" d="M0,100 Q50,120 100,70 T150,90 T200,50 T250,70 T300,30" stroke-dasharray="500"/>
+      </svg>
+    </div>
+    <div class="bg-line-graph bg-line-graph-2">
+      <svg viewBox="0 0 300 150" preserveAspectRatio="none">
+        <path class="graph-line" d="M0,130 Q75,50 150,80 T300,20" stroke-dasharray="500"/>
+        <path class="graph-line graph-line-2" d="M0,110 Q75,90 150,40 T300,60" stroke-dasharray="500"/>
+      </svg>
+    </div>
+    
+    <!-- RADAR CHARTS -->
+    <div class="bg-radar bg-radar-1">
+      <div class="radar-ring radar-ring-1"></div>
+      <div class="radar-ring radar-ring-2"></div>
+      <div class="radar-ring radar-ring-3"></div>
+      <div class="radar-sweep"></div>
+    </div>
+    <div class="bg-radar bg-radar-2">
+      <div class="radar-ring radar-ring-1"></div>
+      <div class="radar-ring radar-ring-2"></div>
+      <div class="radar-ring radar-ring-3"></div>
+      <div class="radar-sweep"></div>
+    </div>
+    
+    <!-- HEARTBEAT LINES -->
+    <div class="bg-heartbeat bg-heartbeat-1">
+      <div class="heartbeat-line"></div>
+    </div>
+    <div class="bg-heartbeat bg-heartbeat-2">
+      <div class="heartbeat-line"></div>
+    </div>
+    
+    <!-- LOADING CIRCLES -->
+    <div class="bg-loading bg-loading-1">
+      <div class="loading-arc"></div>
+      <div class="loading-arc loading-arc-2"></div>
+    </div>
+    <div class="bg-loading bg-loading-2">
+      <div class="loading-arc"></div>
+      <div class="loading-arc loading-arc-2"></div>
+    </div>
+    <div class="bg-loading bg-loading-3">
+      <div class="loading-arc"></div>
+      <div class="loading-arc loading-arc-2"></div>
+    </div>
+    
+    <!-- BRACKET PATTERNS -->
+    <div class="bg-bracket bg-bracket-1">{</div>
+    <div class="bg-bracket bg-bracket-2">}</div>
+    <div class="bg-bracket bg-bracket-3">[</div>
+    
+    <!-- VOLUME METERS -->
+    <div class="bg-volume-meter bg-volume-meter-1">
+      <div class="meter-bar" style="height:15px;animation-delay:0s"></div>
+      <div class="meter-bar" style="height:25px;animation-delay:0.1s"></div>
+      <div class="meter-bar" style="height:40px;animation-delay:0.2s"></div>
+      <div class="meter-bar" style="height:30px;animation-delay:0.3s"></div>
+      <div class="meter-bar" style="height:55px;animation-delay:0.4s"></div>
+      <div class="meter-bar" style="height:45px;animation-delay:0.5s"></div>
+      <div class="meter-bar" style="height:60px;animation-delay:0.6s"></div>
+      <div class="meter-bar" style="height:35px;animation-delay:0.7s"></div>
+    </div>
+    <div class="bg-volume-meter bg-volume-meter-2">
+      <div class="meter-bar" style="height:20px;animation-delay:0s"></div>
+      <div class="meter-bar" style="height:35px;animation-delay:0.15s"></div>
+      <div class="meter-bar" style="height:50px;animation-delay:0.3s"></div>
+      <div class="meter-bar" style="height:40px;animation-delay:0.45s"></div>
+      <div class="meter-bar" style="height:65px;animation-delay:0.6s"></div>
+      <div class="meter-bar" style="height:55px;animation-delay:0.75s"></div>
+      <div class="meter-bar" style="height:45px;animation-delay:0.9s"></div>
+    </div>
+    
+    <!-- INFINITY SYMBOLS -->
+    <div class="bg-infinity bg-infinity-1">∞</div>
+    <div class="bg-infinity bg-infinity-2">∞</div>
+    
+    <!-- HASH PATTERNS -->
+    <div class="bg-hash bg-hash-1">################
+####  ####  ####
+####  ####  ####
+################
+####  ####  ####
+####  ####  ####
+################</div>
+    <div class="bg-hash bg-hash-2">================
+||  ||  ||  ||
+||  ||  ||  ||
+================
+||  ||  ||  ||
+||  ||  ||  ||
+================</div>
+  </div>
+
+  <!-- ANIMATED CHART BACKGROUND -->
+  <div class="chart-bg">
+    <!-- Grid -->
+    <div class="chart-grid"></div>
+    
+    <!-- Animated Price Line -->
+    <div class="chart-line">
+      <svg viewBox="0 0 1200 200" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#00ff88;stop-opacity:0"/>
+            <stop offset="50%" style="stop-color:#00ff88;stop-opacity:1"/>
+            <stop offset="100%" style="stop-color:#00ff88;stop-opacity:0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,100 Q50,80 100,90 T200,70 T300,100 T400,60 T500,85 T600,50 T700,90 T800,40 T900,75 T1000,55 T1100,80 T1200,45" 
+              fill="none" stroke="url(#lineGrad)" stroke-width="2"/>
+        <path d="M0,120 Q50,100 100,110 T200,90 T300,120 T400,80 T500,105 T600,70 T700,110 T800,60 T900,95 T1000,75 T1100,100 T1200,65" 
+              fill="none" stroke="#00e5ff" stroke-width="1" opacity="0.5"/>
+      </svg>
+    </div>
+    
+    <!-- Candlesticks -->
+    <div class="candlesticks">
+      <div class="candle green"></div>
+      <div class="candle red"></div>
+      <div class="candle green"></div>
+      <div class="candle green"></div>
+      <div class="candle red"></div>
+      <div class="candle green"></div>
+      <div class="candle red"></div>
+      <div class="candle green"></div>
+      <div class="candle green"></div>
+      <div class="candle red"></div>
+      <div class="candle green"></div>
+      <div class="candle green"></div>
+      <div class="candle red"></div>
+      <div class="candle green"></div>
+      <div class="candle green"></div>
+      <div class="candle red"></div>
+      <div class="candle green"></div>
+      <div class="candle red"></div>
+      <div class="candle green"></div>
+      <div class="candle green"></div>
+      <div class="candle red"></div>
+      <div class="candle green"></div>
+      <div class="candle green"></div>
+      <div class="candle red"></div>
+      <div class="candle green"></div>
+    </div>
+    
+    <!-- Price Levels -->
+    <div class="chart-levels">
+      <div class="level-line"></div>
+      <div class="level-line"></div>
+      <div class="level-line"></div>
+      <div class="level-line"></div>
+      <div class="level-line"></div>
+    </div>
+    
+    <!-- Floating Numbers -->
+    <div class="chart-numbers">
+      <span class="chart-num">1.2847</span>
+      <span class="chart-num">1.2835</span>
+      <span class="chart-num">1.2822</span>
+      <span class="chart-num">1.2810</span>
+      <span class="chart-num">1.2798</span>
+    </div>
+    
+    <!-- Rising Particles -->
+    <div class="chart-particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+    
+    <!-- Volume Bars -->
+    <div class="chart-volume">
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+      <div class="vol-bar"></div>
+    </div>
+    
+    <!-- Glowing Orbs -->
+    <div class="chart-glow chart-glow-1"></div>
+    <div class="chart-glow chart-glow-2"></div>
+    <div class="chart-glow chart-glow-3"></div>
+  </div>
+
+  <!-- FLOATING TRADING SYMBOLS -->
+  <div class="floating-symbols">
+    <span class="float-symbol">$</span>
+    <span class="float-symbol">📈</span>
+    <span class="float-symbol">💰</span>
+    <span class="float-symbol">📊</span>
+    <span class="float-symbol">💵</span>
+    <span class="float-symbol">🚀</span>
+    <span class="float-symbol">💎</span>
+    <span class="float-symbol">⚡</span>
+  </div>
+
+  <!-- ANIMATED NOTIFICATION TOAST -->
+  <div class="live-toast" id="liveToast">
+    <div class="toast-icon">🎯</div>
+    <div class="toast-content">
+      <span class="toast-title">New Profit Alert!</span>
+      <span class="toast-text">Member just made +$2,450 today</span>
+    </div>
+  </div>
+
+  <!-- NAVIGATION -->
+  <nav class="nav">
+    <a href="#" class="nav-logo">AKAPWC</a>
+    <div class="nav-links">
+      <a href="#how" class="nav-link">How It Works</a>
+      <a href="#results" class="nav-link">Results</a>
+      <a href="#why" class="nav-link">Why Us</a>
+      <a href="#faq" class="nav-link">FAQ</a>
+      <a href="#start" class="nav-cta">Get Started Free →</a>
+    </div>
+    <div class="mobile-menu"><span></span><span></span><span></span></div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-attention">⚡ Trusted by 8,000+ Traders in Our Discord Community</div>
+      <h1 class="hero-title">
+        <em>Attention All Aspiring Traders…</em><br>
+        Learn How to Make <span class="highlight">$1,000–$5,000</span><br>
+        <span class="green">Per Day Trading</span>
+      </h1>
+      <p class="hero-subtitle">Unlocks access to the proven $10B Range Bars System that turns market volatility into consistent profits. No customers. No products. No sales. Just pure trading profit.</p>
+      <a href="#start" class="hero-cta">
+        Start Your Trading Journey →
+        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" fill="currentColor"/></svg>
+      </a>
+      
+      <!-- Scroll Indicator -->
+      <div class="scroll-indicator">
+        <span>Scroll to explore</span>
+        <div class="scroll-arrow">
+          <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" fill="currentColor"/></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="container">
+      <div class="stats-grid stagger-children" id="statsGrid">
+        <div class="stat-item stagger-item">
+          <div class="stat-value" data-count="8000">0+</div>
+          <div class="stat-label">Active Community Members</div>
+        </div>
+        <div class="stat-item stagger-item">
+          <div class="stat-value">$10B+</div>
+          <div class="stat-label">System Volume Tracked</div>
+        </div>
+        <div class="stat-item stagger-item">
+          <div class="stat-value" data-count="97.3">0%</div>
+          <div class="stat-label">Member Satisfaction Rate</div>
+        </div>
+        <div class="stat-item stagger-item">
+          <div class="stat-value">24/7</div>
+          <div class="stat-label">Live Trading Support</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIDEO SECTION -->
+  <section class="video-section section">
+    <div class="container">
+      <div class="video-container reveal-scale">
+        <div class="video-card glow-on-scroll" onclick="window.open('#', '_blank')">
+          <div class="video-thumb">
+            <div class="video-content">
+              <div class="video-badge"><span class="live-dot"></span>🔴 Top Secret Strategy</div>
+              <h2 class="video-title">$10B RANGE BARS SYSTEM</h2>
+              <div class="play-btn">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="how-section section">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag">How It Works</div>
+        <h2 class="section-title">Your Path to Trading Success</h2>
+        <p class="section-subtitle">Follow our proven 4-step system that has helped thousands of traders achieve consistent profits</p>
+      </div>
+      
+      <div class="section-divider"></div>
+      
+      <div class="intro-text reveal-left glow-on-scroll text-reveal">
+        <p><strong>Think making consistent profits trading is impossible?</strong></p>
+        <p>The financial industry wants you to believe that. See... While other aspiring traders lose money chasing tips and signals, our community has helped over <span class="green">8,000+ traders</span> learn a proven system that actually works.</p>
+        <p>We're not your typical "trading gurus"…</p>
+        <p>We're traders who have <strong>proven experience</strong>, <strong>proven systems</strong>, and <strong>proven results</strong> using the Range Bars methodology that tracks over $10 billion in market volume.</p>
+        <p>While others stay frustrated with losses… <span class="green">We've turned the "impossible" into inevitable.</span></p>
+      </div>
+
+      <!-- FOLLOW THESE STEPS -->
+      <div class="steps-header">
+        <div class="steps-divider"></div>
+        <span class="steps-header-text">Follow These Steps ↓</span>
+        <div class="steps-divider"></div>
+      </div>
+
+      <div class="steps-container reveal-flip">
+        <!-- MAIN STEP 1 BUTTON -->
+        <a href="https://abbado.com" target="_blank" class="step-main">
+          <span class="step-main-label">Step 1 — Start Here</span>
+          <span class="step-main-title">Register on Abbado.com</span>
+          <span class="step-main-desc">Use a licensed & regulated trading platform with no fees. Safe & Secure.</span>
+          <div class="step-main-arrow">
+            <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+          </div>
+        </a>
+
+        <!-- LOCKED STEPS 2-4 -->
+        <div class="steps-locked-wrapper">
+          <div class="steps-locked-overlay" onclick="alert('Complete Step 1 first by registering on Abbado.com')">
+            <span class="steps-locked-text">👆 Click Here After Completing Step 1</span>
+          </div>
+          <div class="steps-locked-grid">
+            <div class="step-locked-card">
+              <div class="step-locked-num">2</div>
+              <div class="step-locked-label">Step 2</div>
+              <div class="step-locked-title">Access $10 Range Bars System</div>
+            </div>
+            <div class="step-locked-card">
+              <div class="step-locked-num">3</div>
+              <div class="step-locked-label">Step 3</div>
+              <div class="step-locked-title">Access All Premium Trainings</div>
+            </div>
+            <div class="step-locked-card">
+              <div class="step-locked-num">4</div>
+              <div class="step-locked-label">Step 4</div>
+              <div class="step-locked-title">Join Our Free Discord</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AKAPWC-STYLE ACCORDION BARS -->
+      <div class="action-accordions stagger-children">
+        <div class="action-bar stagger-item" onclick="toggleActionBar(this)">
+          <span class="action-bar-text">– Join Our Free Daily Profit Sessions –</span>
+          <span class="action-bar-icon">∨</span>
+        </div>
+        <div class="action-bar-content">
+          <p>Join our daily live trading sessions where we trade together as a community. Watch real trades happen in real-time and learn from experienced traders. Sessions run Monday through Friday during peak market hours. Get notified via Discord when sessions go live.</p>
+        </div>
+
+        <div class="action-bar stagger-item" onclick="toggleActionBar(this)">
+          <span class="action-bar-text">– Video Reviews –</span>
+          <span class="action-bar-icon">∨</span>
+        </div>
+        <div class="action-bar-content">
+          <p>See what our community members have to say about their experience with the $10B Range Bars System. Real testimonials from real traders who have transformed their trading results. Success stories updated weekly.</p>
+        </div>
+
+        <div class="action-bar stagger-item" onclick="toggleActionBar(this)">
+          <span class="action-bar-text">– Take Action –</span>
+          <span class="action-bar-icon">∨</span>
+        </div>
+        <div class="action-bar-content">
+          <p>Ready to start your journey? Complete Step 1 by registering on Abbado.com to unlock all the resources, trainings, and community access. The sooner you start, the sooner you can begin implementing the strategies that have helped thousands of traders achieve consistent profits.</p>
+        </div>
+
+        <div class="action-bar stagger-item" onclick="toggleActionBar(this)">
+          <span class="action-bar-text">– FAQ –</span>
+          <span class="action-bar-icon">∨</span>
+        </div>
+        <div class="action-bar-content">
+          <p><strong>How much money do I need?</strong> Start with $100-$500 to learn.</p>
+          <p><strong>Do I need experience?</strong> No, we teach everything from scratch.</p>
+          <p><strong>Is the Discord really free?</strong> Yes, 100% free after completing Step 1.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS SECTION -->
+  <section id="results" class="results-section section">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag">Real Results</div>
+        <h2 class="section-title">Browse Through Our Member Results</h2>
+        <p class="section-subtitle">At AKAPWC, we pride ourselves on our 97.3% member satisfaction rate</p>
+      </div>
+      
+      <div class="section-divider"></div>
+
+      <div class="results-grid wave-reveal">
+        <div class="result-card wave-item tilt-card">
+          <div class="result-image">📈</div>
+          <div class="result-content">
+            <div class="result-amount">+$4,250 / Day</div>
+            <p class="result-text">"Made my monthly salary in a single trading session using the Range Bars system."</p>
+          </div>
+        </div>
+        <div class="result-card wave-item tilt-card">
+          <div class="result-image">💰</div>
+          <div class="result-content">
+            <div class="result-amount">+$2,800 / Day</div>
+            <p class="result-text">"Finally quit my 9-5 after 3 months of consistent profits with this community."</p>
+          </div>
+        </div>
+        <div class="result-card wave-item tilt-card">
+          <div class="result-image">🚀</div>
+          <div class="result-content">
+            <div class="result-amount">+$1,500 / Day</div>
+            <p class="result-text">"Started with $500 and grew it to $15k in my first month. Life changing."</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card blur-in glow-on-scroll">
+        <div class="testimonial-badge">⭐ Featured Review</div>
+        <p class="testimonial-text">"Very professional team, they walked me through the whole entire process step by step. <strong>Without the AKAPWC community I don't know where I would be.</strong> Got consistent profits in less than two months!"</p>
+        <p class="testimonial-author">— Discord Community Member</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY US -->
+  <section id="why" class="why-section section">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag">Why AKAPWC</div>
+        <h2 class="section-title">What Makes Us Different</h2>
+        <p class="section-subtitle">Here's why thousands of traders choose our community over everything else</p>
+      </div>
+      
+      <div class="section-divider"></div>
+
+      <div class="why-grid stagger-children">
+        <div class="why-card stagger-item bounce-in">
+          <div class="why-icon">🎯</div>
+          <h3 class="why-title">Proven $10B System</h3>
+          <p class="why-text">Our Range Bars methodology tracks over $10 billion in market volume, giving you institutional-level insights that retail traders never see.</p>
+        </div>
+        <div class="why-card stagger-item bounce-in">
+          <div class="why-icon">👥</div>
+          <h3 class="why-title">8,000+ Active Traders</h3>
+          <p class="why-text">Join a thriving community of traders who share setups, ask questions, and celebrate wins together every single day.</p>
+        </div>
+        <div class="why-card stagger-item bounce-in">
+          <div class="why-icon">📺</div>
+          <h3 class="why-title">Daily Live Sessions</h3>
+          <p class="why-text">Watch real trades happen in real-time during our daily profit sessions. Learn by watching experienced traders execute.</p>
+        </div>
+        <div class="why-card stagger-item bounce-in">
+          <div class="why-icon">🎓</div>
+          <h3 class="why-title">Complete Training Library</h3>
+          <p class="why-text">Access our comprehensive video training that takes you from beginner to profitable trader, step by step.</p>
+        </div>
+        <div class="why-card stagger-item bounce-in">
+          <div class="why-icon">💬</div>
+          <h3 class="why-title">24/7 Support</h3>
+          <p class="why-text">Get help whenever you need it from our team and community moderators who are always available in Discord.</p>
+        </div>
+        <div class="why-card stagger-item bounce-in">
+          <div class="why-icon">🆓</div>
+          <h3 class="why-title">100% Free to Start</h3>
+          <p class="why-text">No hidden fees, no expensive courses, no upsells. Just register and get access to everything you need to start trading.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="faq-section section">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag">FAQ</div>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <p class="section-subtitle">Everything you need to know about AKAPWC</p>
+      </div>
+      
+      <div class="section-divider"></div>
+
+      <div class="faq-grid stagger-children">
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">How much money do I need to start trading?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">You can start with as little as $100-$500 to begin learning and practicing with small positions. Many of our successful members started with minimal capital and grew their accounts over time using proper risk management.</div>
+          </div>
+        </div>
+
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">Do I need any prior trading experience?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">No prior experience is required. Our training library is designed to take complete beginners from zero to profitable trading. We cover everything from basics to advanced strategies.</div>
+          </div>
+        </div>
+
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">What is the Range Bars trading system?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Range Bars is a price-based charting method that filters out market noise and shows only significant price movements. Our $10B system uses this methodology to identify high-probability trading setups that institutional traders use.</div>
+          </div>
+        </div>
+
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">Is the Discord community really free?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Yes, our Discord community, daily live sessions, and core trainings are completely free to access. You just need to complete Step 1 (registering on Abbado.com) to unlock full access.</div>
+          </div>
+        </div>
+
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">How long before I see results?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Results vary based on your dedication and practice. Some members see their first profitable trades within weeks, while others take 1-2 months to become consistent. The key is following the system and being patient.</div>
+          </div>
+        </div>
+
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">What markets can I trade with this system?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">The Range Bars system works across multiple markets including forex, stocks, indices, commodities, and cryptocurrencies. The methodology is universal and adapts to any liquid market.</div>
+          </div>
+        </div>
+
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">Why do I need to register on Abbado.com first?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">Abbado.com is our recommended licensed and regulated trading platform that integrates with our system. It's safe, secure, has no hidden fees, and provides the tools you need to execute the strategies we teach.</div>
+          </div>
+        </div>
+
+        <div class="faq-item stagger-item">
+          <div class="faq-header" onclick="toggleFaq(this)">
+            <span class="faq-question">What kind of support do you provide?</span>
+            <div class="faq-icon"><svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></div>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">We provide support through our Discord community 24/7, daily live trading sessions, comprehensive video training, and direct access to experienced traders who can answer your questions.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BROKERS -->
+  <section class="brokers-section">
+    <div class="brokers-title reveal">Compatible with Major Trading Platforms</div>
+    <div class="brokers-marquee">
+      <span class="broker-logo">MetaTrader 4</span>
+      <span class="broker-logo">MetaTrader 5</span>
+      <span class="broker-logo">TradingView</span>
+      <span class="broker-logo">cTrader</span>
+      <span class="broker-logo">NinjaTrader</span>
+      <span class="broker-logo">Abbado</span>
+      <span class="broker-logo">ThinkOrSwim</span>
+      <span class="broker-logo">Interactive Brokers</span>
+      <span class="broker-logo">MetaTrader 4</span>
+      <span class="broker-logo">MetaTrader 5</span>
+      <span class="broker-logo">TradingView</span>
+      <span class="broker-logo">cTrader</span>
+      <span class="broker-logo">NinjaTrader</span>
+      <span class="broker-logo">Abbado</span>
+      <span class="broker-logo">ThinkOrSwim</span>
+      <span class="broker-logo">Interactive Brokers</span>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="start" class="cta-section">
+    <div class="container">
+      <div class="cta-card reveal-scale glow-on-scroll pulse-on-scroll">
+        <h2 class="cta-title">Ready to Start Your Trading Journey?</h2>
+        <p class="cta-subtitle">Join 8,000+ traders who are already making consistent profits with the $10B Range Bars System</p>
+        <a href="https://abbado.com" class="cta-btn" target="_blank">
+          Register on Abbado.com →
+        </a>
+        <p class="cta-note">🔒 Safe & Secure • Licensed & Regulated • No Hidden Fees</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer reveal">
+    <div class="container">
+      <div class="footer-top stagger-children">
+        <div class="footer-brand stagger-item">
+          <div class="footer-logo">AKAPWC</div>
+          <p>Empowering traders worldwide with the proven $10B Range Bars System. Join our community of 8,000+ traders today.</p>
+        </div>
+        <div class="footer-links stagger-item">
+          <h4>Quick Links</h4>
+          <a href="#how">How It Works</a>
+          <a href="#results">Results</a>
+          <a href="#why">Why Us</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        <div class="footer-links stagger-item">
+          <h4>Legal</h4>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Risk Disclaimer</a>
+          <a href="#">Refund Policy</a>
+        </div>
+        <div class="footer-links stagger-item">
+          <h4>Connect</h4>
+          <div class="footer-social">
+            <a href="#" class="social-btn"><svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg></a>
+            <a href="#" class="social-btn"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073z"/></svg></a>
+            <a href="#" class="social-btn"><svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 AKAPWC | Empowering Traders Worldwide</p>
+        <p style="margin-top:16px"><strong>Disclaimer:</strong> Trading involves substantial risk of loss and is not suitable for all investors. Past performance does not guarantee future results. The testimonials and results shown are not typical and individual results will vary. This site is for educational purposes only and does not constitute financial advice.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- DISCORD FLOAT -->
+  <div class="discord-float">
+    <a href="#" class="discord-btn" target="_blank">
+      <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+    </a>
+  </div>
+
+  <script>
+    function toggleFaq(header) {
+      const item = header.parentElement;
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    }
+
+    function toggleActionBar(bar) {
+      const content = bar.nextElementSibling;
+      const isOpen = bar.classList.contains('open');
+      
+      // Close all action bars
+      document.querySelectorAll('.action-bar').forEach(b => b.classList.remove('open'));
+      document.querySelectorAll('.action-bar-content').forEach(c => c.classList.remove('open'));
+      
+      // Open clicked one if it wasn't already open
+      if (!isOpen) {
+        bar.classList.add('open');
+        content.classList.add('open');
+      }
+    }
+
+    // ========== SCROLL PROGRESS BAR ==========
+    window.addEventListener('scroll', () => {
+      const scrollProgress = document.getElementById('scrollProgress');
+      const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const progress = (scrollTop / scrollHeight) * 100;
+      scrollProgress.style.width = progress + '%';
+    });
+
+    // ========== SCROLL REVEAL ANIMATIONS ==========
+    const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-rotate, .reveal-flip, .stagger-children, .wave-reveal, .bounce-in, .slide-fade, .zoom-rotate, .blur-in, .tilt-card, .expand-center, .glow-on-scroll, .pulse-on-scroll, .section-divider, .text-reveal, .clip-reveal, .pop-in, .rotate-in, .underline-grow, .skew-in, .slide-fade-left, .slide-fade-right, .glow-intensify, .float-on-scroll, .border-draw, .scroll-shadow, .shake-on-scroll');
+
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          
+          // Trigger pulse animation
+          if (entry.target.classList.contains('pulse-on-scroll')) {
+            entry.target.style.animation = 'none';
+            setTimeout(() => {
+              entry.target.style.animation = 'scrollPulse 0.6s ease-out';
+            }, 10);
+          }
+        }
+      });
+    }, {
+      threshold: 0.15,
+      rootMargin: '0px 0px -50px 0px'
+    });
+
+    revealElements.forEach(el => revealObserver.observe(el));
+
+    // ========== COUNTER ANIMATION ==========
+    function animateCounter(element, target, duration = 2000, isPercent = false) {
+      let start = 0;
+      const increment = target / (duration / 16);
+      
+      function updateCounter() {
+        start += increment;
+        if (start < target) {
+          if (isPercent) {
+            element.textContent = start.toFixed(1) + '%';
+          } else {
+            element.textContent = Math.floor(start).toLocaleString() + '+';
+          }
+          requestAnimationFrame(updateCounter);
+        } else {
+          if (isPercent) {
+            element.textContent = target + '%';
+          } else {
+            element.textContent = target.toLocaleString() + '+';
+          }
+        }
+      }
+      updateCounter();
+    }
+
+    // Stats counter observer
+    const statsGrid = document.getElementById('statsGrid');
+    let statsAnimated = false;
+    
+    const statsObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !statsAnimated) {
+          statsAnimated = true;
+          entry.target.classList.add('active');
+          
+          // Animate the counters
+          const statValues = entry.target.querySelectorAll('.stat-value[data-count]');
+          statValues.forEach(stat => {
+            const target = parseFloat(stat.dataset.count);
+            const isPercent = stat.textContent.includes('%');
+            animateCounter(stat, target, 2000, isPercent);
+          });
+        }
+      });
+    }, { threshold: 0.5 });
+
+    if (statsGrid) statsObserver.observe(statsGrid);
+
+    // ========== PARALLAX EFFECT ==========
+    const parallaxElements = document.querySelectorAll('.parallax');
+    
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      
+      parallaxElements.forEach(el => {
+        const speed = el.dataset.speed || 0.5;
+        const yPos = -(scrollY * speed);
+        el.style.transform = `translateY(${yPos}px)`;
+      });
+    });
+
+    // ========== MOUSE MOVE PARALLAX FOR HERO ==========
+    const hero = document.querySelector('.hero');
+    if (hero) {
+      hero.addEventListener('mousemove', (e) => {
+        const rect = hero.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        
+        const elements = hero.querySelectorAll('.hero-title, .hero-cta');
+        elements.forEach(el => {
+          el.style.transform = `translate(${x * 10}px, ${y * 10}px)`;
+        });
+      });
+      
+      hero.addEventListener('mouseleave', () => {
+        const elements = hero.querySelectorAll('.hero-title, .hero-cta');
+        elements.forEach(el => {
+          el.style.transform = 'translate(0, 0)';
+        });
+      });
+    }
+
+    // ========== LIVE TOAST NOTIFICATIONS ==========
+    const toastMessages = [
+      { icon: '🎯', title: 'New Profit Alert!', text: 'Member just made +$2,450 today' },
+      { icon: '🚀', title: 'Trading Session Live!', text: '847 traders currently online' },
+      { icon: '💰', title: 'Daily Goal Hit!', text: 'Community reached $50K+ profits' },
+      { icon: '⚡', title: 'New Member Joined!', text: 'Welcome from United Kingdom' },
+      { icon: '📈', title: 'Market Alert!', text: 'High probability setup detected' },
+      { icon: '🔥', title: 'Hot Streak!', text: '15 winning trades in a row' },
+      { icon: '💎', title: 'Milestone Reached!', text: 'Member hit $100K profits' },
+      { icon: '🏆', title: 'Top Trader!', text: '+$5,200 profit this session' },
+    ];
+
+    function showToast() {
+      const toast = document.getElementById('liveToast');
+      const msg = toastMessages[Math.floor(Math.random() * toastMessages.length)];
+      
+      toast.querySelector('.toast-icon').textContent = msg.icon;
+      toast.querySelector('.toast-title').textContent = msg.title;
+      toast.querySelector('.toast-text').textContent = msg.text;
+      
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 4000);
+    }
+
+    // Show first toast after 3 seconds, then every 12 seconds
+    setTimeout(() => {
+      showToast();
+      setInterval(showToast, 12000);
+    }, 3000);
+
+    // ========== SPARKLE EFFECT ON BUTTONS ==========
+    document.querySelectorAll('.hero-cta, .cta-btn, .step-main, .nav-cta').forEach(btn => {
+      btn.addEventListener('mouseenter', function(e) {
+        for(let i = 0; i < 8; i++) {
+          setTimeout(() => {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+            sparkle.style.left = (Math.random() * 100) + '%';
+            sparkle.style.top = (Math.random() * 100) + '%';
+            sparkle.style.width = (Math.random() * 6 + 4) + 'px';
+            sparkle.style.height = sparkle.style.width;
+            this.appendChild(sparkle);
+            setTimeout(() => sparkle.remove(), 800);
+          }, i * 80);
+        }
+      });
+    });
+
+    // ========== TILT EFFECT ON CARDS ==========
+    document.querySelectorAll('.result-card, .why-card').forEach(card => {
+      card.addEventListener('mousemove', function(e) {
+        const rect = this.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = (y - centerY) / 20;
+        const rotateY = (centerX - x) / 20;
+        
+        this.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-10px)`;
+      });
+      
+      card.addEventListener('mouseleave', function() {
+        this.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0)';
+      });
+    });
+
+    // ========== SCROLL-TRIGGERED BACKGROUND CHANGES ==========
+    const sections = document.querySelectorAll('.section');
+    const chartBg = document.querySelector('.chart-bg');
+    
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      
+      // Fade chart background based on scroll
+      if (chartBg) {
+        const opacity = Math.max(0.05, 0.12 - (scrollY / (windowHeight * 3)));
+        chartBg.style.opacity = opacity;
+      }
+    });
+
+    // ========== MAGNETIC BUTTONS ==========
+    document.querySelectorAll('.hero-cta, .cta-btn').forEach(btn => {
+      btn.addEventListener('mousemove', function(e) {
+        const rect = this.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        
+        this.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+      });
+      
+      btn.addEventListener('mouseleave', function() {
+        this.style.transform = 'translate(0, 0)';
+      });
+    });
+
+    // ========== SMOOTH SECTION TRANSITIONS ==========
+    const allSections = document.querySelectorAll('section');
+    
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    allSections.forEach(section => {
+      section.style.opacity = '0';
+      section.style.transform = 'translateY(30px)';
+      section.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
+      sectionObserver.observe(section);
+    });
+
+    // Make hero visible immediately
+    const heroSection = document.querySelector('.hero');
+    if (heroSection) {
+      heroSection.style.opacity = '1';
+      heroSection.style.transform = 'translateY(0)';
+    }
+
+    // ========== TYPING EFFECT FOR SUBTITLES ==========
+    function typeWriter(element, text, speed = 50) {
+      let i = 0;
+      element.textContent = '';
+      
+      function type() {
+        if (i < text.length) {
+          element.textContent += text.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        }
+      }
+      type();
+    }
+
+    // ========== SCROLL INDICATOR HIDE ON SCROLL ==========
+    const scrollIndicator = document.querySelector('.scroll-indicator');
+    if (scrollIndicator) {
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 200) {
+          scrollIndicator.style.opacity = '0';
+          scrollIndicator.style.transform = 'translateY(20px)';
+        } else {
+          scrollIndicator.style.opacity = '1';
+          scrollIndicator.style.transform = 'translateY(0)';
+        }
+      });
+      scrollIndicator.style.transition = 'all 0.5s ease-out';
+    }
+  </script>
+</body>
+</html>
